@@ -6,6 +6,7 @@ namespace HouseholdManagement.Models.ViewModels
 {
     public class HouseholdViewModel
     {
+        public int Id { get; set; }
         [Required]
         public string Name { get; set; }
         [Required]

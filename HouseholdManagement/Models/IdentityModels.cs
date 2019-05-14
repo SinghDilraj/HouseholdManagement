@@ -18,11 +18,16 @@ namespace HouseholdManagement.Models
         [InverseProperty(nameof(Household.Members))]
         public virtual List<Household> OwnedHouseholds { get; set; }
 
+        [InverseProperty(nameof(Household.Invitees))]
+        public virtual List<Household> InvitedHouseholds { get; set; }
+
         public ApplicationUser()
         {
             Households = new List<Household>();
 
             OwnedHouseholds = new List<Household>();
+
+            InvitedHouseholds = new List<Household>();
         }
 
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager, string authenticationType)
