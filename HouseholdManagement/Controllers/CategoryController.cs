@@ -7,6 +7,8 @@ using System.Web.Http;
 
 namespace HouseholdManagement.Controllers
 {
+    //[Authorize]
+    [RoutePrefix("Api/Category")]
     public class CategoryController : BaseController
     {
         // GET: api/Category
@@ -15,8 +17,9 @@ namespace HouseholdManagement.Controllers
             return Ok();
         }
 
+        [Route("categoryId:int")]
         // GET: api/Category/5
-        public IHttpActionResult Get(int? householdId)
+        public IHttpActionResult Get(int? categoryId)
         {
             return Ok();
         }
@@ -28,13 +31,13 @@ namespace HouseholdManagement.Controllers
         }
 
         // PUT: api/Category/5
-        public IHttpActionResult Put(int? householdId)
+        public IHttpActionResult Put(int? categoryId)
         {
             return Ok();
         }
 
         // DELETE: api/Category/5
-        public IHttpActionResult Delete(int? householdId)
+        public IHttpActionResult Delete(int? categoryId)
         {
             return Ok();
         }
