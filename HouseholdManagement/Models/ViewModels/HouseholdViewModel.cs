@@ -12,13 +12,13 @@ namespace HouseholdManagement.Models.ViewModels
         [Required]
         public string Description { get; set; }
         public string OwnerId { get; set; }
-        public List<string> MembersId { get; set; }
+        public List<UserViewModel> Members { get; set; }
         public DateTime Created { get; set; }
         public DateTime? Updated { get; set; }
 
         public HouseholdViewModel()
         {
-            MembersId = new List<string>();
+            Members = new List<UserViewModel>();
         }
     }
 }

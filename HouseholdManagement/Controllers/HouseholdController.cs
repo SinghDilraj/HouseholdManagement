@@ -14,7 +14,7 @@ namespace HouseholdManagement.Controllers
     /// <summary>
     /// Household controller to create, edit and delete a household. Also invite other users to a household and view members of a household.
     /// </summary>
-    //[Authorize]
+    [System.Web.Http.Authorize]
     [RoutePrefix("Api/Household")]
     public class HouseholdController : BaseController
     {
@@ -41,7 +41,11 @@ namespace HouseholdManagement.Controllers
                         Created = p.Created,
                         Updated = p.Updated,
                         OwnerId = p.Owner.Id,
-                        MembersId = p.Members.Select(q => q.Id).ToList()
+                        Members = p.Members.Select(q => new UserViewModel
+                        {
+                            Id = q.Id,
+                            Email = q.Email
+                        }).ToList()
                     }).ToList();
 
                 return Ok(households);
@@ -52,6 +56,10 @@ namespace HouseholdManagement.Controllers
             }
         }
 
+        /// <summary>
+        /// Get method to get all users from a users households
+        /// </summary>
+        /// <returns></returns>
         [Route("Users")]
         //GET: api/Household
         public IHttpActionResult GetUsersFromHouseholds()
@@ -66,7 +74,11 @@ namespace HouseholdManagement.Controllers
                     {
                         Id = p.Id,
                         OwnerId = p.Owner.Id,
-                        MembersId = p.Members.Select(q => q.Id).ToList()
+                        Members = p.Members.Select(q => new UserViewModel
+                        {
+                            Id = q.Id,
+                            Email = q.Email
+                        }).ToList()
                     }).ToList();
 
                 return Ok(households);
@@ -108,7 +120,11 @@ namespace HouseholdManagement.Controllers
                             Created = household.Created,
                             Updated = household.Updated,
                             OwnerId = household.Owner.Id,
-                            MembersId = household.Members.Select(p => p.Id).ToList()
+                            Members = household.Members.Select(q => new UserViewModel
+                            {
+                                Id = q.Id,
+                                Email = q.Email
+                            }).ToList()
                         };
 
                         return Ok(viewModel);
@@ -164,7 +180,11 @@ namespace HouseholdManagement.Controllers
                     Created = household.Created,
                     Updated = household.Updated,
                     OwnerId = household.Owner?.Id,
-                    MembersId = household.Members.Select(p => p.Id).ToList()
+                    Members = household.Members.Select(q => new UserViewModel
+                    {
+                        Id = q.Id,
+                        Email = q.Email
+                    }).ToList()
                 };
 
                 return Ok(viewModel);
@@ -215,7 +235,11 @@ namespace HouseholdManagement.Controllers
                             Created = household.Created,
                             Updated = household.Updated,
                             OwnerId = household.Owner.Id,
-                            MembersId = household.Members.Select(p => p.Id).ToList()
+                            Members = household.Members.Select(q => new UserViewModel
+                            {
+                                Id = q.Id,
+                                Email = q.Email
+                            }).ToList()
                         };
 
                         return Ok(viewModel);
