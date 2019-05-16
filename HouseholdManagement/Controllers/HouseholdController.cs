@@ -234,7 +234,7 @@ namespace HouseholdManagement.Controllers
             }
             else
             {
-                return BadRequest("User is not authenticated");
+                return Unauthorized();
             }
         }
 
