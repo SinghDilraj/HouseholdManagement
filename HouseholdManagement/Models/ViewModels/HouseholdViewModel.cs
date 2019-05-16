@@ -11,7 +11,7 @@ namespace HouseholdManagement.Models.ViewModels
         public string Name { get; set; }
         [Required]
         public string Description { get; set; }
-        public string OwnerId { get; set; }
+        public UserViewModel Owner { get; set; }
         public List<UserViewModel> Members { get; set; }
         public DateTime Created { get; set; }
         public DateTime? Updated { get; set; }

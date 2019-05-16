@@ -27,12 +27,12 @@ namespace HouseholdManagement.Controllers
         //GET: api/Household
         public IHttpActionResult GetAllHouseholds()
         {
-            Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+            string userId = User.Identity.GetUserId();
 
-            if (user != null)
+            if (!string.IsNullOrEmpty(userId))
             {
                 System.Collections.Generic.List<HouseholdViewModel> households = DbContext.Households
-                    .Where(p => p.Owner == user || p.Members.Contains(user))
+                    .Where(p => p.Owner.Id == userId || p.Members.Any(q => q.Id == userId))
                     .Select(p => new HouseholdViewModel
                     {
                         Id = p.Id,
@@ -40,7 +40,11 @@ namespace HouseholdManagement.Controllers
                         Description = p.Description,
                         Created = p.Created,
                         Updated = p.Updated,
-                        OwnerId = p.Owner.Id,
+                        Owner = new UserViewModel
+                        {
+                            Id = p.Owner.Id,
+                            Email = p.Owner.Email
+                        },
                         Members = p.Members.Select(q => new UserViewModel
                         {
                             Id = q.Id,
@@ -64,16 +68,20 @@ namespace HouseholdManagement.Controllers
         //GET: api/Household
         public IHttpActionResult GetUsersFromHouseholds()
         {
-            Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+            string userId = User.Identity.GetUserId();
 
-            if (user != null)
+            if (!string.IsNullOrEmpty(userId))
             {
-                System.Collections.Generic.List<HouseholdViewModel> households = DbContext.Households
-                    .Where(p => p.Owner == user || p.Members.Contains(user))
-                    .Select(p => new HouseholdViewModel
+                System.Collections.Generic.List<HouseholdUsersViewModel> households = DbContext.Households
+                    .Where(p => p.Owner.Id == userId || p.Members.Any(q => q.Id == userId))
+                    .Select(p => new HouseholdUsersViewModel
                     {
-                        Id = p.Id,
-                        OwnerId = p.Owner.Id,
+                        HouseholdId = p.Id,
+                        Owner = new UserViewModel
+                        {
+                            Id = p.Owner.Id,
+                            Email = p.Owner.Email
+                        },
                         Members = p.Members.Select(q => new UserViewModel
                         {
                             Id = q.Id,
@@ -110,7 +118,7 @@ namespace HouseholdManagement.Controllers
 
                 if (household != null && user != null)
                 {
-                    if (household.Owner == user || household.Members.Contains(user))
+                    if (household.Owner.Id == user.Id || household.Members.Contains(user))
                     {
                         HouseholdViewModel viewModel = new HouseholdViewModel
                         {
@@ -119,7 +127,11 @@ namespace HouseholdManagement.Controllers
                             Description = household.Description,
                             Created = household.Created,
                             Updated = household.Updated,
-                            OwnerId = household.Owner.Id,
+                            Owner = new UserViewModel
+                            {
+                                Id = household.Owner.Id,
+                                Email = household.Owner.Email
+                            },
                             Members = household.Members.Select(q => new UserViewModel
                             {
                                 Id = q.Id,
@@ -165,7 +177,7 @@ namespace HouseholdManagement.Controllers
                 {
                     Name = model.Name,
                     Description = model.Description,
-                    Owner = DbContext.Users.FirstOrDefault(p => p.Id == model.OwnerId)
+                    Owner = user
                 };
 
                 DbContext.Households.Add(household);
@@ -179,7 +191,11 @@ namespace HouseholdManagement.Controllers
                     Description = household.Description,
                     Created = household.Created,
                     Updated = household.Updated,
-                    OwnerId = household.Owner?.Id,
+                    Owner = new UserViewModel
+                    {
+                        Id = household.Owner.Id,
+                        Email = household.Owner.Email
+                    },
                     Members = household.Members.Select(q => new UserViewModel
                     {
                         Id = q.Id,
@@ -234,7 +250,11 @@ namespace HouseholdManagement.Controllers
                             Description = household.Description,
                             Created = household.Created,
                             Updated = household.Updated,
-                            OwnerId = household.Owner.Id,
+                            Owner = new UserViewModel
+                            {
+                                Id = household.Owner.Id,
+                                Email = household.Owner.Email
+                            },
                             Members = household.Members.Select(q => new UserViewModel
                             {
                                 Id = q.Id,
@@ -308,8 +328,8 @@ namespace HouseholdManagement.Controllers
         /// <summary>
         /// post method to invite users to a household (only owner of the household can invite)
         /// </summary>
-        /// <param name="userId">
-        /// id of user to invite
+        /// <param name="userEmail">
+        /// email of user to invite
         /// </param>
         /// <param name="householdId">
         /// id of household to join through invitation
@@ -392,6 +412,8 @@ namespace HouseholdManagement.Controllers
                     if (User != null && household.Owner != user && !household.Members.Contains(user) && household.Invitees.Contains(user))
                     {
                         household.Members.Add(user);
+
+                        household.Invitees.Remove(user);
 
                         DbContext.SaveChanges();
 

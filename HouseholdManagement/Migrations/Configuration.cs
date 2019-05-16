@@ -18,22 +18,6 @@ namespace HouseholdManagement.Migrations
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
             //  to avoid creating duplicate seed data.
-
-            RoleManager<IdentityRole> roleManager =
-                new RoleManager<IdentityRole>(
-                    new RoleStore<IdentityRole>(context));
-
-            if (!context.Roles.Any(p => p.Name == "Owner"))
-            {
-                IdentityRole ownerRole = new IdentityRole("Owner");
-                roleManager.Create(ownerRole);
-            }
-
-            if (!context.Roles.Any(p => p.Name == "Member"))
-            {
-                IdentityRole memberRole = new IdentityRole("Member");
-                roleManager.Create(memberRole);
-            }
         }
     }
 }
