@@ -45,6 +45,15 @@ namespace HouseholdManagement.Controllers
                             Id = p.Owner.Id,
                             Email = p.Owner.Email
                         },
+                        Categories = p.Categories.Select(x => new CategoryViewModel
+                        {
+                            Id = x.Id,
+                            Name = x.Name,
+                            Description = x.Description,
+                            Created = x.Created,
+                            Updated = x.Updated,
+                            HouseholdId = x.Household.Id
+                        }).ToList(),
                         Members = p.Members.Select(q => new UserViewModel
                         {
                             Id = q.Id,
@@ -132,6 +141,15 @@ namespace HouseholdManagement.Controllers
                                 Id = household.Owner.Id,
                                 Email = household.Owner.Email
                             },
+                            Categories = household.Categories.Select(x => new CategoryViewModel
+                            {
+                                Id = x.Id,
+                                Name = x.Name,
+                                Description = x.Description,
+                                Created = x.Created,
+                                Updated = x.Updated,
+                                HouseholdId = x.Household.Id
+                            }).ToList(),
                             Members = household.Members.Select(q => new UserViewModel
                             {
                                 Id = q.Id,
@@ -196,6 +214,15 @@ namespace HouseholdManagement.Controllers
                         Id = household.Owner.Id,
                         Email = household.Owner.Email
                     },
+                    Categories = household.Categories.Select(x => new CategoryViewModel
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Description = x.Description,
+                        Created = x.Created,
+                        Updated = x.Updated,
+                        HouseholdId = x.Household.Id
+                    }).ToList(),
                     Members = household.Members.Select(q => new UserViewModel
                     {
                         Id = q.Id,
@@ -255,6 +282,15 @@ namespace HouseholdManagement.Controllers
                                 Id = household.Owner.Id,
                                 Email = household.Owner.Email
                             },
+                            Categories = household.Categories.Select(x => new CategoryViewModel
+                            {
+                                Id = x.Id,
+                                Name = x.Name,
+                                Description = x.Description,
+                                Created = x.Created,
+                                Updated = x.Updated,
+                                HouseholdId = x.Household.Id
+                            }).ToList(),
                             Members = household.Members.Select(q => new UserViewModel
                             {
                                 Id = q.Id,

@@ -39,6 +39,11 @@ namespace HouseholdManagement.Models.Domain
         public virtual List<ApplicationUser> Invitees { get; set; }
 
         /// <summary>
+        /// list of categories in the household
+        /// </summary>
+        public virtual List<Category> Categories { get; set; }
+
+        /// <summary>
         /// household creation date
         /// </summary>
         public DateTime Created { get; set; }
@@ -56,6 +61,7 @@ namespace HouseholdManagement.Models.Domain
             Created = DateTime.Now;
             Members = new List<ApplicationUser>();
             Invitees = new List<ApplicationUser>();
+            Categories = new List<Category>();
         }
     }
 }

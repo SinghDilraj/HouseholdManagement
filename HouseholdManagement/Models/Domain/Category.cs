@@ -20,6 +20,10 @@ namespace HouseholdManagement.Models.Domain
         /// </summary>
         public string Description { get; set; }
         /// <summary>
+        /// Household this category belong to
+        /// </summary>
+        public virtual Household Household { get; set; }
+        /// <summary>
         /// creation date of category
         /// </summary>
         public DateTime Created { get; set; }
