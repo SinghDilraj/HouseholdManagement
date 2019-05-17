@@ -164,6 +164,7 @@ namespace HouseholdManagement.Controllers
         /// edited category
         /// </returns>
         // PUT: api/Category/5
+        [Route("categoryId:int")]
         public IHttpActionResult Put(int? categoryId, CategoryViewModel model)
         {
             if (categoryId.HasValue)
@@ -228,6 +229,7 @@ namespace HouseholdManagement.Controllers
         /// ok with success message
         /// </returns>
         // DELETE: api/Category/5
+        [Route("categoryId:int")]
         public IHttpActionResult Delete(int? categoryId)
         {
             if (categoryId.HasValue)

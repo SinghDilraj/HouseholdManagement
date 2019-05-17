@@ -154,41 +154,35 @@ namespace HouseholdManagement.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
         // POST api/Account/ForgotPassword
         [Route("ForgotPassword")]
-        public async Task<IHttpActionResult> ForgotPassword(string userEmail, ResetPasswordEditModel model)
+        public async Task<IHttpActionResult> ForgotPassword(string userEmail)
         {
             if (string.IsNullOrEmpty(userEmail))
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest("Model not Valid");
-                }
-                else
-                {
-                    ApplicationUser user = UserManager.FindByEmail(userEmail);
+                ApplicationUser user = UserManager.FindByEmail(userEmail);
 
-                    if (user != null)
+                if (user != null)
+                {
+                    string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+
+                    if (!string.IsNullOrEmpty(code))
                     {
-                        string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+                        MyEmailService emailService = new MyEmailService();
 
-                        if (!string.IsNullOrEmpty(code))
-                        {
-                            MyEmailService emailService = new MyEmailService();
+                        emailService.Send(user.Email, "Reset Password", $"Please go to ' /api/account/ResetPassword ' and enter your email, new password, confrim password and code = {code}");
 
-                            emailService.Send(user.Email, "Reset Password", $"Please go to ' /api/account/ResetPassword ' and enter your email, new password, confrim password and code = {code}");
-
-                            return Ok("Please check your email");
-                        }
-                        else
-                        {
-                            return Unauthorized();
-                        }
+                        return Ok("Please check your email");
                     }
                     else
                     {
-                        return NotFound();
+                        return Unauthorized();
                     }
+                }
+                else
+                {
+                    return NotFound();
                 }
             }
             else
@@ -206,7 +200,7 @@ namespace HouseholdManagement.Controllers
 
                 if (user != null)
                 {
-                    var result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.ConfirmPassword);
+                    IdentityResult result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.ConfirmPassword);
 
                     if (result.Succeeded)
                     {
