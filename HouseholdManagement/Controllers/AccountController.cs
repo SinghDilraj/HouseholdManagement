@@ -1,4 +1,15 @@
-﻿using System;
+﻿using HouseholdManagement.Models;
+using HouseholdManagement.Models.Helpers;
+using HouseholdManagement.Models.ViewModels;
+using HouseholdManagement.Providers;
+using HouseholdManagement.Results;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OAuth;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
@@ -6,16 +17,6 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
-using System.Web.Http.ModelBinding;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
-using Microsoft.Owin.Security.Cookies;
-using Microsoft.Owin.Security.OAuth;
-using HouseholdManagement.Models;
-using HouseholdManagement.Providers;
-using HouseholdManagement.Results;
 
 namespace HouseholdManagement.Controllers
 {
@@ -125,7 +126,7 @@ namespace HouseholdManagement.Controllers
 
             IdentityResult result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword,
                 model.NewPassword);
-            
+
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
@@ -151,6 +152,80 @@ namespace HouseholdManagement.Controllers
             }
 
             return Ok();
+        }
+
+        // POST api/Account/ForgotPassword
+        [Route("ForgotPassword")]
+        public async Task<IHttpActionResult> ForgotPassword(string userEmail, ResetPasswordEditModel model)
+        {
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest("Model not Valid");
+                }
+                else
+                {
+                    ApplicationUser user = UserManager.FindByEmail(userEmail);
+
+                    if (user != null)
+                    {
+                        string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+
+                        if (!string.IsNullOrEmpty(code))
+                        {
+                            MyEmailService emailService = new MyEmailService();
+
+                            emailService.Send(user.Email, "Reset Password", $"Please go to ' /api/account/ResetPassword ' and enter your email, new password, confrim password and code = {code}");
+
+                            return Ok("Please check your email");
+                        }
+                        else
+                        {
+                            return Unauthorized();
+                        }
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+            }
+            else
+            {
+                return BadRequest("User Email not valid");
+            }
+        }
+
+        [Route("ResetPassword")]
+        public async Task<IHttpActionResult> ResetPassword(ResetPasswordEditModel model)
+        {
+            if (model.NewPassword == model.ConfirmPassword)
+            {
+                ApplicationUser user = UserManager.FindByEmail(model.Email);
+
+                if (user != null)
+                {
+                    var result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.ConfirmPassword);
+
+                    if (result.Succeeded)
+                    {
+                        return Ok("Password reset success");
+                    }
+                    else
+                    {
+                        return Unauthorized();
+                    }
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            else
+            {
+                return BadRequest("Password do not match");
+            }
         }
 
         // POST api/Account/AddExternalLogin
@@ -258,9 +333,9 @@ namespace HouseholdManagement.Controllers
             if (hasRegistered)
             {
                 Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
-                
-                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(UserManager,
-                    OAuthDefaults.AuthenticationType);
+
+                ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(UserManager,
+                   OAuthDefaults.AuthenticationType);
                 ClaimsIdentity cookieIdentity = await user.GenerateUserIdentityAsync(UserManager,
                     CookieAuthenticationDefaults.AuthenticationType);
 
@@ -328,7 +403,7 @@ namespace HouseholdManagement.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+            ApplicationUser user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
 
@@ -351,13 +426,13 @@ namespace HouseholdManagement.Controllers
                 return BadRequest(ModelState);
             }
 
-            var info = await Authentication.GetExternalLoginInfoAsync();
+            ExternalLoginInfo info = await Authentication.GetExternalLoginInfoAsync();
             if (info == null)
             {
                 return InternalServerError();
             }
 
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+            ApplicationUser user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
 
             IdentityResult result = await UserManager.CreateAsync(user);
             if (!result.Succeeded)
@@ -368,7 +443,7 @@ namespace HouseholdManagement.Controllers
             result = await UserManager.AddLoginAsync(user.Id, info.Login);
             if (!result.Succeeded)
             {
-                return GetErrorResult(result); 
+                return GetErrorResult(result);
             }
             return Ok();
         }

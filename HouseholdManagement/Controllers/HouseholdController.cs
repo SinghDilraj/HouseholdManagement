@@ -185,52 +185,59 @@ namespace HouseholdManagement.Controllers
         /// ok with the created household
         /// </returns>
         // POST: api/Household
-        public IHttpActionResult PostCreateHousehold(HouseholdViewModel model)
+        public IHttpActionResult PostCreateHousehold(HouseholdEditModel model)
         {
             Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
 
             if (User != null)
             {
-                Household household = new Household
+                if (ModelState.IsValid)
                 {
-                    Name = model.Name,
-                    Description = model.Description,
-                    Owner = user
-                };
+                    Household household = new Household
+                    {
+                        Name = model.Name,
+                        Description = model.Description,
+                        Owner = user
+                    };
 
-                DbContext.Households.Add(household);
+                    DbContext.Households.Add(household);
 
-                DbContext.SaveChanges();
+                    DbContext.SaveChanges();
 
-                HouseholdViewModel viewModel = new HouseholdViewModel
+                    HouseholdViewModel viewModel = new HouseholdViewModel
+                    {
+                        Id = household.Id,
+                        Name = household.Name,
+                        Description = household.Description,
+                        Created = household.Created,
+                        Updated = household.Updated,
+                        Owner = new UserViewModel
+                        {
+                            Id = household.Owner.Id,
+                            Email = household.Owner.Email
+                        },
+                        Categories = household.Categories.Select(x => new CategoryViewModel
+                        {
+                            Id = x.Id,
+                            Name = x.Name,
+                            Description = x.Description,
+                            Created = x.Created,
+                            Updated = x.Updated,
+                            HouseholdId = x.Household.Id
+                        }).ToList(),
+                        Members = household.Members.Select(q => new UserViewModel
+                        {
+                            Id = q.Id,
+                            Email = q.Email
+                        }).ToList()
+                    };
+
+                    return Ok(viewModel);
+                }
+                else
                 {
-                    Id = household.Id,
-                    Name = household.Name,
-                    Description = household.Description,
-                    Created = household.Created,
-                    Updated = household.Updated,
-                    Owner = new UserViewModel
-                    {
-                        Id = household.Owner.Id,
-                        Email = household.Owner.Email
-                    },
-                    Categories = household.Categories.Select(x => new CategoryViewModel
-                    {
-                        Id = x.Id,
-                        Name = x.Name,
-                        Description = x.Description,
-                        Created = x.Created,
-                        Updated = x.Updated,
-                        HouseholdId = x.Household.Id
-                    }).ToList(),
-                    Members = household.Members.Select(q => new UserViewModel
-                    {
-                        Id = q.Id,
-                        Email = q.Email
-                    }).ToList()
-                };
-
-                return Ok(viewModel);
+                    return BadRequest(ModelState);
+                }
             }
             else
             {
@@ -252,7 +259,7 @@ namespace HouseholdManagement.Controllers
         /// </returns>
         [Route("{householdId:int}")]
         // PUT: api/Household/5
-        public IHttpActionResult PutEditHousehold(int? householdId, HouseholdViewModel model)
+        public IHttpActionResult PutEditHousehold(int? householdId, HouseholdEditModel model)
         {
             if (householdId.HasValue)
             {
@@ -264,41 +271,48 @@ namespace HouseholdManagement.Controllers
 
                     if (User != null && household.Owner == user)
                     {
-                        household.Name = model.Name;
-                        household.Description = model.Description;
-                        household.Updated = DateTime.Now;
-
-                        DbContext.SaveChanges();
-
-                        HouseholdViewModel viewModel = new HouseholdViewModel
+                        if (ModelState.IsValid)
                         {
-                            Id = household.Id,
-                            Name = household.Name,
-                            Description = household.Description,
-                            Created = household.Created,
-                            Updated = household.Updated,
-                            Owner = new UserViewModel
-                            {
-                                Id = household.Owner.Id,
-                                Email = household.Owner.Email
-                            },
-                            Categories = household.Categories.Select(x => new CategoryViewModel
-                            {
-                                Id = x.Id,
-                                Name = x.Name,
-                                Description = x.Description,
-                                Created = x.Created,
-                                Updated = x.Updated,
-                                HouseholdId = x.Household.Id
-                            }).ToList(),
-                            Members = household.Members.Select(q => new UserViewModel
-                            {
-                                Id = q.Id,
-                                Email = q.Email
-                            }).ToList()
-                        };
+                            household.Name = model.Name;
+                            household.Description = model.Description;
+                            household.Updated = DateTime.Now;
 
-                        return Ok(viewModel);
+                            DbContext.SaveChanges();
+
+                            HouseholdViewModel viewModel = new HouseholdViewModel
+                            {
+                                Id = household.Id,
+                                Name = household.Name,
+                                Description = household.Description,
+                                Created = household.Created,
+                                Updated = household.Updated,
+                                Owner = new UserViewModel
+                                {
+                                    Id = household.Owner.Id,
+                                    Email = household.Owner.Email
+                                },
+                                Categories = household.Categories.Select(x => new CategoryViewModel
+                                {
+                                    Id = x.Id,
+                                    Name = x.Name,
+                                    Description = x.Description,
+                                    Created = x.Created,
+                                    Updated = x.Updated,
+                                    HouseholdId = x.Household.Id
+                                }).ToList(),
+                                Members = household.Members.Select(q => new UserViewModel
+                                {
+                                    Id = q.Id,
+                                    Email = q.Email
+                                }).ToList()
+                            };
+
+                            return Ok(viewModel);
+                        }
+                        else
+                        {
+                            return BadRequest(ModelState);
+                        }
                     }
                     else
                     {

@@ -103,7 +103,7 @@ namespace HouseholdManagement.Controllers
         /// Post method to create a new category
         /// </summary>
         /// <param name="model">
-        /// category model with category name and description required
+        /// category model with category name and description with household id int required
         /// </param>
         /// <returns>
         /// newly created category
@@ -115,27 +115,35 @@ namespace HouseholdManagement.Controllers
 
             if (User != null)
             {
-                Category category = new Category
+                if (ModelState.IsValid)
                 {
-                    Name = model.Name,
-                    Description = model.Description,
-                };
+                    Category category = new Category
+                    {
+                        Name = model.Name,
+                        Description = model.Description,
+                        Household = DbContext.Households.FirstOrDefault(p => p.Id == model.HouseholdId)
+                    };
 
-                DbContext.Categories.Add(category);
+                    DbContext.Categories.Add(category);
 
-                DbContext.SaveChanges();
+                    DbContext.SaveChanges();
 
-                CategoryViewModel viewModel = new CategoryViewModel
+                    CategoryViewModel viewModel = new CategoryViewModel
+                    {
+                        Id = category.Id,
+                        Name = category.Name,
+                        Description = category.Description,
+                        Created = category.Created,
+                        Updated = category.Updated,
+                        HouseholdId = category.Household.Id
+                    };
+
+                    return Ok(viewModel);
+                }
+                else
                 {
-                    Id = category.Id,
-                    Name = category.Name,
-                    Description = category.Description,
-                    Created = category.Created,
-                    Updated = category.Updated,
-                    HouseholdId = category.Household.Id
-                };
-
-                return Ok(viewModel);
+                    return BadRequest(ModelState);
+                }
             }
             else
             {
@@ -168,23 +176,31 @@ namespace HouseholdManagement.Controllers
 
                     if (User != null && category.Household.Owner == user)
                     {
-                        category.Name = model.Name;
-                        category.Description = model.Description;
-                        category.Updated = DateTime.Now;
-
-                        DbContext.SaveChanges();
-
-                        CategoryViewModel viewModel = new CategoryViewModel
+                        if (ModelState.IsValid)
                         {
-                            Id = category.Id,
-                            Name = category.Name,
-                            Description = category.Description,
-                            Created = category.Created,
-                            Updated = category.Updated,
-                            HouseholdId = category.Household.Id
-                        };
+                            category.Name = model.Name;
+                            category.Description = model.Description;
+                            category.Household = DbContext.Households.FirstOrDefault(p => p.Id == model.HouseholdId);
+                            category.Updated = DateTime.Now;
 
-                        return Ok(viewModel);
+                            DbContext.SaveChanges();
+
+                            CategoryViewModel viewModel = new CategoryViewModel
+                            {
+                                Id = category.Id,
+                                Name = category.Name,
+                                Description = category.Description,
+                                Created = category.Created,
+                                Updated = category.Updated,
+                                HouseholdId = category.Household.Id
+                            };
+
+                            return Ok(viewModel);
+                        }
+                        else
+                        {
+                            return BadRequest(ModelState);
+                        }
                     }
                     else
                     {
