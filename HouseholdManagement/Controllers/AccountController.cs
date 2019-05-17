@@ -159,7 +159,7 @@ namespace HouseholdManagement.Controllers
         [Route("ForgotPassword")]
         public async Task<IHttpActionResult> ForgotPassword(string userEmail)
         {
-            if (string.IsNullOrEmpty(userEmail))
+            if (!string.IsNullOrEmpty(userEmail))
             {
                 ApplicationUser user = UserManager.FindByEmail(userEmail);
 
@@ -191,6 +191,7 @@ namespace HouseholdManagement.Controllers
             }
         }
 
+        [AllowAnonymous]
         [Route("ResetPassword")]
         public async Task<IHttpActionResult> ResetPassword(ResetPasswordEditModel model)
         {
