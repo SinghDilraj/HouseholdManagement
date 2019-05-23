@@ -117,61 +117,54 @@ namespace HouseholdManagement.Controllers
         /// </returns>
         [Route("{householdId:int}")]
         // GET: api/Household/5
-        public IHttpActionResult GetHouseholdById(int? householdId)
+        public IHttpActionResult GetHouseholdById(int householdId)
         {
-            if (householdId.HasValue)
+            Household household = DbContext.Households.FirstOrDefault(p => p.Id == householdId);
+
+            Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+
+            if (household != null && user != null)
             {
-                Household household = DbContext.Households.FirstOrDefault(p => p.Id == householdId);
-
-                Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
-
-                if (household != null && user != null)
+                if (household.Owner.Id == user.Id || household.Members.Contains(user))
                 {
-                    if (household.Owner.Id == user.Id || household.Members.Contains(user))
+                    HouseholdViewModel viewModel = new HouseholdViewModel
                     {
-                        HouseholdViewModel viewModel = new HouseholdViewModel
+                        Id = household.Id,
+                        Name = household.Name,
+                        Description = household.Description,
+                        Created = household.Created,
+                        Updated = household.Updated,
+                        Owner = new UserViewModel
                         {
-                            Id = household.Id,
-                            Name = household.Name,
-                            Description = household.Description,
-                            Created = household.Created,
-                            Updated = household.Updated,
-                            Owner = new UserViewModel
-                            {
-                                Id = household.Owner.Id,
-                                Email = household.Owner.Email
-                            },
-                            Categories = household.Categories.Select(x => new CategoryViewModel
-                            {
-                                Id = x.Id,
-                                Name = x.Name,
-                                Description = x.Description,
-                                Created = x.Created,
-                                Updated = x.Updated,
-                                HouseholdId = x.Household.Id
-                            }).ToList(),
-                            Members = household.Members.Select(q => new UserViewModel
-                            {
-                                Id = q.Id,
-                                Email = q.Email
-                            }).ToList()
-                        };
+                            Id = household.Owner.Id,
+                            Email = household.Owner.Email
+                        },
+                        Categories = household.Categories.Select(x => new CategoryViewModel
+                        {
+                            Id = x.Id,
+                            Name = x.Name,
+                            Description = x.Description,
+                            Created = x.Created,
+                            Updated = x.Updated,
+                            HouseholdId = x.Household.Id
+                        }).ToList(),
+                        Members = household.Members.Select(q => new UserViewModel
+                        {
+                            Id = q.Id,
+                            Email = q.Email
+                        }).ToList()
+                    };
 
-                        return Ok(viewModel);
-                    }
-                    else
-                    {
-                        return Unauthorized();
-                    }
+                    return Ok(viewModel);
                 }
                 else
                 {
-                    return NotFound();
+                    return Unauthorized();
                 }
             }
             else
             {
-                return BadRequest("Id not valid");
+                return NotFound();
             }
         }
 
@@ -259,74 +252,67 @@ namespace HouseholdManagement.Controllers
         /// </returns>
         [Route("{householdId:int}")]
         // PUT: api/Household/5
-        public IHttpActionResult PutEditHousehold(int? householdId, HouseholdEditModel model)
+        public IHttpActionResult PutEditHousehold(int householdId, HouseholdEditModel model)
         {
-            if (householdId.HasValue)
+            Household household = DbContext.Households.FirstOrDefault(p => p.Id == householdId);
+
+            if (household != null)
             {
-                Household household = DbContext.Households.FirstOrDefault(p => p.Id == householdId);
+                Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
 
-                if (household != null)
+                if (User != null && household.Owner == user)
                 {
-                    Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
-
-                    if (User != null && household.Owner == user)
+                    if (ModelState.IsValid)
                     {
-                        if (ModelState.IsValid)
+                        household.Name = model.Name;
+                        household.Description = model.Description;
+                        household.Updated = DateTime.Now;
+
+                        DbContext.SaveChanges();
+
+                        HouseholdViewModel viewModel = new HouseholdViewModel
                         {
-                            household.Name = model.Name;
-                            household.Description = model.Description;
-                            household.Updated = DateTime.Now;
-
-                            DbContext.SaveChanges();
-
-                            HouseholdViewModel viewModel = new HouseholdViewModel
+                            Id = household.Id,
+                            Name = household.Name,
+                            Description = household.Description,
+                            Created = household.Created,
+                            Updated = household.Updated,
+                            Owner = new UserViewModel
                             {
-                                Id = household.Id,
-                                Name = household.Name,
-                                Description = household.Description,
-                                Created = household.Created,
-                                Updated = household.Updated,
-                                Owner = new UserViewModel
-                                {
-                                    Id = household.Owner.Id,
-                                    Email = household.Owner.Email
-                                },
-                                Categories = household.Categories.Select(x => new CategoryViewModel
-                                {
-                                    Id = x.Id,
-                                    Name = x.Name,
-                                    Description = x.Description,
-                                    Created = x.Created,
-                                    Updated = x.Updated,
-                                    HouseholdId = x.Household.Id
-                                }).ToList(),
-                                Members = household.Members.Select(q => new UserViewModel
-                                {
-                                    Id = q.Id,
-                                    Email = q.Email
-                                }).ToList()
-                            };
+                                Id = household.Owner.Id,
+                                Email = household.Owner.Email
+                            },
+                            Categories = household.Categories.Select(x => new CategoryViewModel
+                            {
+                                Id = x.Id,
+                                Name = x.Name,
+                                Description = x.Description,
+                                Created = x.Created,
+                                Updated = x.Updated,
+                                HouseholdId = x.Household.Id
+                            }).ToList(),
+                            Members = household.Members.Select(q => new UserViewModel
+                            {
+                                Id = q.Id,
+                                Email = q.Email
+                            }).ToList()
+                        };
 
-                            return Ok(viewModel);
-                        }
-                        else
-                        {
-                            return BadRequest(ModelState);
-                        }
+                        return Ok(viewModel);
                     }
                     else
                     {
-                        return Unauthorized();
+                        return BadRequest(ModelState);
                     }
                 }
                 else
                 {
-                    return NotFound();
+                    return Unauthorized();
                 }
             }
             else
             {
-                return BadRequest("Household id not valid");
+                return NotFound();
             }
         }
 
@@ -341,37 +327,30 @@ namespace HouseholdManagement.Controllers
         /// </returns>
         [Route("{householdId:int}")]
         // DELETE: api/Household/5
-        public IHttpActionResult DeleteHousehold(int? householdId)
+        public IHttpActionResult DeleteHousehold(int householdId)
         {
-            if (householdId.HasValue)
+            Household household = DbContext.Households.FirstOrDefault(p => p.Id == householdId);
+
+            if (household != null)
             {
-                Household household = DbContext.Households.FirstOrDefault(p => p.Id == householdId);
+                Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
 
-                if (household != null)
+                if (User != null && household.Owner == user)
                 {
-                    Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+                    DbContext.Households.Remove(household);
 
-                    if (User != null && household.Owner == user)
-                    {
-                        DbContext.Households.Remove(household);
+                    DbContext.SaveChanges();
 
-                        DbContext.SaveChanges();
-
-                        return Ok("Successfully deleted.");
-                    }
-                    else
-                    {
-                        return Unauthorized();
-                    }
+                    return Ok("Successfully deleted.");
                 }
                 else
                 {
-                    return NotFound();
+                    return Unauthorized();
                 }
             }
             else
             {
-                return BadRequest("Household id not valid");
+                return NotFound();
             }
         }
 
@@ -388,9 +367,9 @@ namespace HouseholdManagement.Controllers
         /// ok with a link to join household
         /// </returns>
         [Route("{userEmail:minlength(1)}/{householdId:int}")]
-        public IHttpActionResult PostInviteUsers(string userEmail, int? householdId)
+        public IHttpActionResult PostInviteUsers(string userEmail, int householdId)
         {
-            if (!string.IsNullOrEmpty(userEmail) && householdId.HasValue)
+            if (!string.IsNullOrEmpty(userEmail))
             {
                 Models.ApplicationUser user = DefaultUserManager.FindByEmail(userEmail);
 
@@ -435,7 +414,7 @@ namespace HouseholdManagement.Controllers
             }
             else
             {
-                return BadRequest("id not valid");
+                return BadRequest("Email not valid");
             }
         }
 
@@ -449,39 +428,32 @@ namespace HouseholdManagement.Controllers
         /// ok success message
         /// </returns>
         [Route("Join/{householdId:int}")]
-        public IHttpActionResult JoinHousehold(int? householdId)
+        public IHttpActionResult JoinHousehold(int householdId)
         {
-            if (householdId.HasValue)
+            Household household = DbContext.Households.FirstOrDefault(p => p.Id == householdId);
+
+            if (household != null)
             {
-                Household household = DbContext.Households.FirstOrDefault(p => p.Id == householdId);
+                Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
 
-                if (household != null)
+                if (User != null && household.Owner != user && !household.Members.Contains(user) && household.Invitees.Contains(user))
                 {
-                    Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+                    household.Members.Add(user);
 
-                    if (User != null && household.Owner != user && !household.Members.Contains(user) && household.Invitees.Contains(user))
-                    {
-                        household.Members.Add(user);
+                    household.Invitees.Remove(user);
 
-                        household.Invitees.Remove(user);
+                    DbContext.SaveChanges();
 
-                        DbContext.SaveChanges();
-
-                        return Ok("Successfully joined the household.");
-                    }
-                    else
-                    {
-                        return Unauthorized();
-                    }
+                    return Ok("Successfully joined the household.");
                 }
                 else
                 {
-                    return NotFound();
+                    return Unauthorized();
                 }
             }
             else
             {
-                return BadRequest("Household id not valid");
+                return NotFound();
             }
         }
 
@@ -495,37 +467,30 @@ namespace HouseholdManagement.Controllers
         /// ok success message
         /// </returns>
         [Route("Leave/{householdId:int}")]
-        public IHttpActionResult LeaveHousehold(int? householdId)
+        public IHttpActionResult LeaveHousehold(int householdId)
         {
-            if (householdId.HasValue)
+            Household household = DbContext.Households.FirstOrDefault(p => p.Id == householdId);
+
+            if (household != null)
             {
-                Household household = DbContext.Households.FirstOrDefault(p => p.Id == householdId);
+                Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
 
-                if (household != null)
+                if (User != null && household.Owner != user && household.Members.Contains(user))
                 {
-                    Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+                    household.Members.Remove(user);
 
-                    if (User != null && household.Owner != user && household.Members.Contains(user))
-                    {
-                        household.Members.Remove(user);
+                    DbContext.SaveChanges();
 
-                        DbContext.SaveChanges();
-
-                        return Ok("Successfully left the household.");
-                    }
-                    else
-                    {
-                        return Unauthorized();
-                    }
+                    return Ok("Successfully left the household.");
                 }
                 else
                 {
-                    return NotFound();
+                    return Unauthorized();
                 }
             }
             else
             {
-                return BadRequest("Household id not valid");
+                return NotFound();
             }
         }
     }

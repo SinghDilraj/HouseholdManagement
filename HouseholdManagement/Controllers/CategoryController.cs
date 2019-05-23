@@ -58,44 +58,37 @@ namespace HouseholdManagement.Controllers
         /// </returns>
         [Route("{categoryId:int}")]
         // GET: api/Category/5
-        public IHttpActionResult Get(int? categoryId)
+        public IHttpActionResult Get(int categoryId)
         {
-            if (categoryId.HasValue)
+            Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+
+            Category category = DbContext.Categories
+                    .FirstOrDefault(p => p.Id == categoryId);
+
+            if (user != null && category != null)
             {
-                Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
-
-                Category category = DbContext.Categories
-                        .FirstOrDefault(p => p.Id == categoryId);
-
-                if (user != null && category != null)
+                if (category.Household.Owner == user || category.Household.Members.Any(q => q == user))
                 {
-                    if (category.Household.Owner == user || category.Household.Members.Any(q => q == user))
+                    CategoryViewModel viewModel = new CategoryViewModel
                     {
-                        CategoryViewModel viewModel = new CategoryViewModel
-                        {
-                            Id = category.Id,
-                            Name = category.Name,
-                            Description = category.Description,
-                            HouseholdId = category.Household.Id,
-                            Created = category.Created,
-                            Updated = category.Updated
-                        };
+                        Id = category.Id,
+                        Name = category.Name,
+                        Description = category.Description,
+                        HouseholdId = category.Household.Id,
+                        Created = category.Created,
+                        Updated = category.Updated
+                    };
 
-                        return Ok(viewModel);
-                    }
-                    else
-                    {
-                        return Unauthorized();
-                    }
+                    return Ok(viewModel);
                 }
                 else
                 {
-                    return NotFound();
+                    return Unauthorized();
                 }
             }
             else
             {
-                return BadRequest("Category Id not valid");
+                return NotFound();
             }
         }
 
@@ -165,57 +158,50 @@ namespace HouseholdManagement.Controllers
         /// </returns>
         // PUT: api/Category/5
         [Route("{categoryId:int}")]
-        public IHttpActionResult Put(int? categoryId, CategoryViewModel model)
+        public IHttpActionResult Put(int categoryId, CategoryViewModel model)
         {
-            if (categoryId.HasValue)
+            Category category = DbContext.Categories.FirstOrDefault(p => p.Id == categoryId);
+
+            if (category != null)
             {
-                Category category = DbContext.Categories.FirstOrDefault(p => p.Id == categoryId);
+                Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
 
-                if (category != null)
+                if (User != null && category.Household.Owner == user)
                 {
-                    Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
-
-                    if (User != null && category.Household.Owner == user)
+                    if (ModelState.IsValid)
                     {
-                        if (ModelState.IsValid)
+                        category.Name = model.Name;
+                        category.Description = model.Description;
+                        category.Household = DbContext.Households.FirstOrDefault(p => p.Id == model.HouseholdId);
+                        category.Updated = DateTime.Now;
+
+                        DbContext.SaveChanges();
+
+                        CategoryViewModel viewModel = new CategoryViewModel
                         {
-                            category.Name = model.Name;
-                            category.Description = model.Description;
-                            category.Household = DbContext.Households.FirstOrDefault(p => p.Id == model.HouseholdId);
-                            category.Updated = DateTime.Now;
+                            Id = category.Id,
+                            Name = category.Name,
+                            Description = category.Description,
+                            Created = category.Created,
+                            Updated = category.Updated,
+                            HouseholdId = category.Household.Id
+                        };
 
-                            DbContext.SaveChanges();
-
-                            CategoryViewModel viewModel = new CategoryViewModel
-                            {
-                                Id = category.Id,
-                                Name = category.Name,
-                                Description = category.Description,
-                                Created = category.Created,
-                                Updated = category.Updated,
-                                HouseholdId = category.Household.Id
-                            };
-
-                            return Ok(viewModel);
-                        }
-                        else
-                        {
-                            return BadRequest(ModelState);
-                        }
+                        return Ok(viewModel);
                     }
                     else
                     {
-                        return Unauthorized();
+                        return BadRequest(ModelState);
                     }
                 }
                 else
                 {
-                    return NotFound();
+                    return Unauthorized();
                 }
             }
             else
             {
-                return BadRequest("Category id not valid");
+                return NotFound();
             }
         }
 
@@ -230,37 +216,30 @@ namespace HouseholdManagement.Controllers
         /// </returns>
         // DELETE: api/Category/5
         [Route("{categoryId:int}")]
-        public IHttpActionResult Delete(int? categoryId)
+        public IHttpActionResult Delete(int categoryId)
         {
-            if (categoryId.HasValue)
+            Category category = DbContext.Categories.FirstOrDefault(p => p.Id == categoryId);
+
+            if (category != null)
             {
-                Category category = DbContext.Categories.FirstOrDefault(p => p.Id == categoryId);
+                Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
 
-                if (category != null)
+                if (User != null && category.Household.Owner == user)
                 {
-                    Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+                    DbContext.Categories.Remove(category);
 
-                    if (User != null && category.Household.Owner == user)
-                    {
-                        DbContext.Categories.Remove(category);
+                    DbContext.SaveChanges();
 
-                        DbContext.SaveChanges();
-
-                        return Ok("Successfully deleted.");
-                    }
-                    else
-                    {
-                        return Unauthorized();
-                    }
+                    return Ok("Successfully deleted.");
                 }
                 else
                 {
-                    return NotFound();
+                    return Unauthorized();
                 }
             }
             else
             {
-                return BadRequest("category id not valid");
+                return NotFound();
             }
         }
     }

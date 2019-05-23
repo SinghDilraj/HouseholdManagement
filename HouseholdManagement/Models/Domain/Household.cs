@@ -44,6 +44,11 @@ namespace HouseholdManagement.Models.Domain
         public virtual List<Category> Categories { get; set; }
 
         /// <summary>
+        /// list of bank accounts in the household
+        /// </summary>
+        public virtual List<Household> Households { get; set; }
+
+        /// <summary>
         /// household creation date
         /// </summary>
         public DateTime Created { get; set; }
@@ -54,7 +59,8 @@ namespace HouseholdManagement.Models.Domain
         public DateTime? Updated { get; set; }
 
         /// <summary>
-        /// constructor for houshold to instantiate datecreated to current datetime
+        /// constructor for houshold to instantiate created to current datetime
+        /// and other lists.
         /// </summary>
         public Household()
         {
@@ -62,6 +68,7 @@ namespace HouseholdManagement.Models.Domain
             Members = new List<ApplicationUser>();
             Invitees = new List<ApplicationUser>();
             Categories = new List<Category>();
+            Households = new List<Household>();
         }
     }
 }
