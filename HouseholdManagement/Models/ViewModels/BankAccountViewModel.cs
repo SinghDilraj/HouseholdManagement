@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace HouseholdManagement.Models.ViewModels
@@ -12,8 +13,14 @@ namespace HouseholdManagement.Models.ViewModels
         public string Description { get; set; }
         public DateTime Created { get; set; }
         public DateTime? Updated { get; set; }
-        public Decimal Balance { get; set; }
+        public decimal Balance { get; set; }
         [Required]
         public int HouseholdId { get; set; }
+        public List<TransactionViewModel> Transactions { get; set; }
+
+        public BankAccountViewModel()
+        {
+            Transactions = new List<TransactionViewModel>();
+        }
     }
 }

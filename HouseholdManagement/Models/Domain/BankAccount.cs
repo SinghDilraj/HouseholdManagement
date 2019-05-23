@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HouseholdManagement.Models.Domain
 {
@@ -11,10 +12,12 @@ namespace HouseholdManagement.Models.Domain
         public DateTime? Updated { get; set; }
         public Decimal Balance { get; set; }
         public virtual Household Household { get; set; }
+        public virtual List<Transaction> Transactions { get; set; }
 
         public BankAccount()
         {
             Created = DateTime.Now;
+            Transactions = new List<Transaction>();
         }
     }
 }

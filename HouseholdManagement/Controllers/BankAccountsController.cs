@@ -1,6 +1,7 @@
 ﻿using HouseholdManagement.Models.Domain;
 using HouseholdManagement.Models.ViewModels;
 using Microsoft.AspNet.Identity;
+using System;
 using System.Linq;
 using System.Web.Http;
 
@@ -27,7 +28,28 @@ namespace HouseholdManagement.Controllers
                         Balance = p.Balance,
                         Created = p.Created,
                         HouseholdId = p.Household.Id,
-                        Updated = p.Updated
+                        Updated = p.Updated,
+                        Transactions = p.Transactions
+                        .Select(q => new TransactionViewModel
+                        {
+                            Id = q.Id,
+                            Amount = q.Amount,
+                            Description = q.Description,
+                            Category = new CategoryViewModel
+                            {
+                                Id = q.Category.Id,
+                                Created = q.Category.Created,
+                                Description = q.Category.Description,
+                                HouseholdId = q.Category.Household.Id,
+                                Name = q.Category.Name,
+                                Updated = q.Category.Updated
+                            },
+                            BankAccountId = q.BankAccount.Id,
+                            Created = q.Created,
+                            Initiated = q.Initiated,
+                            Title = q.Title,
+                            Updated = q.Updated
+                        }).ToList()
                     }).ToList();
 
                 return Ok(bankAccounts);
@@ -59,7 +81,28 @@ namespace HouseholdManagement.Controllers
                         Balance = bankAccount.Balance,
                         Created = bankAccount.Created,
                         HouseholdId = bankAccount.Household.Id,
-                        Updated = bankAccount.Updated
+                        Updated = bankAccount.Updated,
+                        Transactions = bankAccount.Transactions
+                        .Select(q => new TransactionViewModel
+                        {
+                            Id = q.Id,
+                            Amount = q.Amount,
+                            Description = q.Description,
+                            Category = new CategoryViewModel
+                            {
+                                Id = q.Category.Id,
+                                Created = q.Category.Created,
+                                Description = q.Category.Description,
+                                HouseholdId = q.Category.Household.Id,
+                                Name = q.Category.Name,
+                                Updated = q.Category.Updated
+                            },
+                            BankAccountId = q.BankAccount.Id,
+                            Created = q.Created,
+                            Initiated = q.Initiated,
+                            Title = q.Title,
+                            Updated = q.Updated
+                        }).ToList()
                     };
 
                     return Ok(viewModel);
@@ -110,7 +153,28 @@ namespace HouseholdManagement.Controllers
                                 Balance = bankAccount.Balance,
                                 Created = bankAccount.Created,
                                 HouseholdId = bankAccount.Household.Id,
-                                Updated = bankAccount.Updated
+                                Updated = bankAccount.Updated,
+                                Transactions = bankAccount.Transactions
+                        .Select(q => new TransactionViewModel
+                        {
+                            Id = q.Id,
+                            Amount = q.Amount,
+                            Description = q.Description,
+                            Category = new CategoryViewModel
+                            {
+                                Id = q.Category.Id,
+                                Created = q.Category.Created,
+                                Description = q.Category.Description,
+                                HouseholdId = q.Category.Household.Id,
+                                Name = q.Category.Name,
+                                Updated = q.Category.Updated
+                            },
+                            BankAccountId = q.BankAccount.Id,
+                            Created = q.Created,
+                            Initiated = q.Initiated,
+                            Title = q.Title,
+                            Updated = q.Updated
+                        }).ToList()
                             };
 
                             return Ok(viewModel);
@@ -153,6 +217,7 @@ namespace HouseholdManagement.Controllers
                         bankAccount.Name = model.Name;
                         bankAccount.Description = model.Description;
                         bankAccount.Household = DbContext.Households.FirstOrDefault(p => p.Id == model.HouseholdId);
+                        bankAccount.Updated = DateTime.Now;
 
                         DbContext.SaveChanges();
 
@@ -164,7 +229,28 @@ namespace HouseholdManagement.Controllers
                             Balance = bankAccount.Balance,
                             Created = bankAccount.Created,
                             HouseholdId = bankAccount.Household.Id,
-                            Updated = bankAccount.Updated
+                            Updated = bankAccount.Updated,
+                            Transactions = bankAccount.Transactions
+                        .Select(q => new TransactionViewModel
+                        {
+                            Id = q.Id,
+                            Amount = q.Amount,
+                            Description = q.Description,
+                            Category = new CategoryViewModel
+                            {
+                                Id = q.Category.Id,
+                                Created = q.Category.Created,
+                                Description = q.Category.Description,
+                                HouseholdId = q.Category.Household.Id,
+                                Name = q.Category.Name,
+                                Updated = q.Category.Updated
+                            },
+                            BankAccountId = q.BankAccount.Id,
+                            Created = q.Created,
+                            Initiated = q.Initiated,
+                            Title = q.Title,
+                            Updated = q.Updated
+                        }).ToList()
                         };
 
                         return Ok(viewModel);
@@ -202,6 +288,30 @@ namespace HouseholdManagement.Controllers
                     DbContext.SaveChanges();
 
                     return Ok("Successfully Deleted.");
+                }
+                else
+                {
+                    return Unauthorized();
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [Route("UpdateBalance/{BankAccountId:int}")]
+        public IHttpActionResult UpdateBalance(int BankAccountId)
+        {
+            Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+
+            BankAccount bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == BankAccountId);
+
+            if (user != null && bankAccount != null)
+            {
+                if (bankAccount.Household.Owner == user)
+                {
+                    return Ok();
                 }
                 else
                 {
