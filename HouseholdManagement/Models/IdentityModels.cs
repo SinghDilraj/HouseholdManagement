@@ -21,6 +21,12 @@ namespace HouseholdManagement.Models
         [InverseProperty(nameof(Household.Invitees))]
         public virtual List<Household> InvitedHouseholds { get; set; }
 
+        [InverseProperty(nameof(Transaction.CreatedBy))]
+        public virtual List<Transaction> TransactionsCreated { get; set; }
+
+        [InverseProperty(nameof(Transaction.Owner))]
+        public virtual List<Transaction> TransactionsOwned { get; set; }
+
         public ApplicationUser()
         {
             Households = new List<Household>();
@@ -28,6 +34,10 @@ namespace HouseholdManagement.Models
             OwnedHouseholds = new List<Household>();
 
             InvitedHouseholds = new List<Household>();
+
+            TransactionsOwned = new List<Transaction>();
+
+            TransactionsCreated = new List<Transaction>();
         }
 
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager, string authenticationType)

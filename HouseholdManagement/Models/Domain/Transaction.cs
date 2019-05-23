@@ -14,6 +14,8 @@ namespace HouseholdManagement.Models.Domain
         public decimal Amount { get; set; }
         public virtual Category Category { get; set; }
         public virtual BankAccount BankAccount { get; set; }
+        public virtual ApplicationUser CreatedBy { get; set; }
+        public virtual ApplicationUser Owner { get; set; }
 
         public Transaction()
         {
