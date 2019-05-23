@@ -16,7 +16,7 @@ namespace HouseholdManagement.Controllers
     /// </summary>
     [System.Web.Http.Authorize]
     [RoutePrefix("Api/Household")]
-    public class HouseholdController : BaseController
+    public class HouseholdsController : BaseController
     {
         /// <summary>
         /// get method to return all the households the user is part of 

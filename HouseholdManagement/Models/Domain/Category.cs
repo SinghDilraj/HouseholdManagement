@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace HouseholdManagement.Models.Domain
 {
@@ -24,6 +25,10 @@ namespace HouseholdManagement.Models.Domain
         /// </summary>
         public virtual Household Household { get; set; }
         /// <summary>
+        /// list of transactions this category belong to
+        /// </summary>
+        public virtual List<Transaction> Transactions { get; set; }
+        /// <summary>
         /// creation date of category
         /// </summary>
         public DateTime Created { get; set; }
@@ -37,6 +42,7 @@ namespace HouseholdManagement.Models.Domain
         public Category()
         {
             Created = DateTime.Now;
+            Transactions = new List<Transaction>();
         }
     }
 }

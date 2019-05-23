@@ -155,26 +155,26 @@ namespace HouseholdManagement.Controllers
                                 HouseholdId = bankAccount.Household.Id,
                                 Updated = bankAccount.Updated,
                                 Transactions = bankAccount.Transactions
-                        .Select(q => new TransactionViewModel
-                        {
-                            Id = q.Id,
-                            Amount = q.Amount,
-                            Description = q.Description,
-                            Category = new CategoryViewModel
-                            {
-                                Id = q.Category.Id,
-                                Created = q.Category.Created,
-                                Description = q.Category.Description,
-                                HouseholdId = q.Category.Household.Id,
-                                Name = q.Category.Name,
-                                Updated = q.Category.Updated
-                            },
-                            BankAccountId = q.BankAccount.Id,
-                            Created = q.Created,
-                            Initiated = q.Initiated,
-                            Title = q.Title,
-                            Updated = q.Updated
-                        }).ToList()
+                                    .Select(q => new TransactionViewModel
+                                    {
+                                        Id = q.Id,
+                                        Amount = q.Amount,
+                                        Description = q.Description,
+                                        Category = new CategoryViewModel
+                                        {
+                                            Id = q.Category.Id,
+                                            Created = q.Category.Created,
+                                            Description = q.Category.Description,
+                                            HouseholdId = q.Category.Household.Id,
+                                            Name = q.Category.Name,
+                                            Updated = q.Category.Updated
+                                        },
+                                        BankAccountId = q.BankAccount.Id,
+                                        Created = q.Created,
+                                        Initiated = q.Initiated,
+                                        Title = q.Title,
+                                        Updated = q.Updated
+                                    }).ToList()
                             };
 
                             return Ok(viewModel);
@@ -311,7 +311,11 @@ namespace HouseholdManagement.Controllers
             {
                 if (bankAccount.Household.Owner == user)
                 {
-                    return Ok();
+                    bankAccount.Balance = bankAccount.Transactions
+                        .Where(p => !p.IsVoid)
+                        .Select(p => p.Amount).Sum();
+
+                    return Ok($"Balance Updated, new Balance is {bankAccount.Balance}");
                 }
                 else
                 {

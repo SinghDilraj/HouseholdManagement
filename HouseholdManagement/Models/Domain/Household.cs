@@ -46,7 +46,7 @@ namespace HouseholdManagement.Models.Domain
         /// <summary>
         /// list of bank accounts in the household
         /// </summary>
-        public virtual List<Household> Households { get; set; }
+        public virtual List<BankAccount> BankAccounts { get; set; }
 
         /// <summary>
         /// household creation date
@@ -68,7 +68,7 @@ namespace HouseholdManagement.Models.Domain
             Members = new List<ApplicationUser>();
             Invitees = new List<ApplicationUser>();
             Categories = new List<Category>();
-            Households = new List<Household>();
+            BankAccounts = new List<BankAccount>();
         }
     }
 }

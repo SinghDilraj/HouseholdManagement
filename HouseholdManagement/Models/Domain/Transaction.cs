@@ -14,5 +14,10 @@ namespace HouseholdManagement.Models.Domain
         public decimal Amount { get; set; }
         public virtual Category Category { get; set; }
         public virtual BankAccount BankAccount { get; set; }
+
+        public Transaction()
+        {
+            Created = DateTime.Now;
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace HouseholdManagement.Models.Domain
         public string Description { get; set; }
         public DateTime Created { get; set; }
         public DateTime? Updated { get; set; }
-        public Decimal Balance { get; set; }
+        public decimal Balance { get; set; }
         public virtual Household Household { get; set; }
         public virtual List<Transaction> Transactions { get; set; }
 

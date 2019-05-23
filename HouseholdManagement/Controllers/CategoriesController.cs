@@ -12,7 +12,7 @@ namespace HouseholdManagement.Controllers
     /// </summary>
     [Authorize]
     [RoutePrefix("Api/Category")]
-    public class CategoryController : BaseController
+    public class CategoriesController : BaseController
     {
         /// <summary>
         /// Get method to return all categories
@@ -158,7 +158,7 @@ namespace HouseholdManagement.Controllers
         /// </returns>
         // PUT: api/Category/5
         [Route("{categoryId:int}")]
-        public IHttpActionResult Put(int categoryId, CategoryViewModel model)
+        public IHttpActionResult Put(int categoryId, CategoryEditModel model)
         {
             Category category = DbContext.Categories.FirstOrDefault(p => p.Id == categoryId);
 
