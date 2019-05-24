@@ -12,41 +12,58 @@ namespace HouseholdManagement.Controllers
     public class TransactionsController : BaseController
     {
         // GET: api/Transactions
-        public IEnumerable<string> Get()
+        public IHttpActionResult Get()
         {
-            return new string[] { "value1", "value2" };
-        }
+            Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
 
-        // GET: api/Transactions/5
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST: api/Transactions
-        public IHttpActionResult Post(TransactionViewModel model)
-        {
-            if (ModelState.IsValid)
+            if (user != null)
             {
-                Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
-
-                if (user != null)
-                {
-                    Transaction transaction = new Transaction
+                List<TransactionViewModel> transactions = DbContext.Transactions
+                    .Where(p => p.BankAccount.Household.Members.Contains(user) || p.BankAccount.Household.Owner == user)
+                    .Select(l => new TransactionViewModel
                     {
-                        Title = model.Title,
-                        Description = model.Description,
-                        Amount = model.Amount,
-                        BankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId),
-                        Category = DbContext.Categories.FirstOrDefault(p => p.Id == model.CategoryId),
-                        Initiated = model.Initiated,
-                        CreatedBy = user,
-                        Owner = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId).Household.Owner,
-                    };
+                        Id = l.Id,
+                        Amount = l.Amount,
+                        BankAccountId = l.BankAccount.Id,
+                        Category = new CategoryViewModel
+                        {
+                            Id = l.Category.Id,
+                            Description = l.Category.Description,
+                            Created = l.Category.Created,
+                            HouseholdId = l.Category.Household.Id,
+                            Name = l.Category.Name,
+                            Updated = l.Category.Updated
+                        },
+                        CategoryId = l.Category.Id,
+                        Created = l.Created,
+                        Description = l.Description,
+                        Initiated = l.Initiated,
+                        IsVoid = l.IsVoid,
+                        Title = l.Title,
+                        Updated = l.Updated
+                    }).ToList();
 
-                    DbContext.Transactions.Add(transaction);
-                    DbContext.SaveChanges();
+                return Ok(transactions);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
 
+        [Route("{transactionId:int}")]
+        // GET: api/Transactions/5
+        public IHttpActionResult Get(int transactionId)
+        {
+            Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+
+            if (user != null)
+            {
+                Transaction transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId &&
+                    p.BankAccount.Household.Members.Contains(user) || p.BankAccount.Household.Owner == user);
+
+                if (transaction != null)
+                {
                     TransactionViewModel viewModel = new TransactionViewModel
                     {
                         Id = transaction.Id,
@@ -74,6 +91,73 @@ namespace HouseholdManagement.Controllers
                 }
                 else
                 {
+                    return NotFound();
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        // POST: api/Transactions
+        public IHttpActionResult Post(TransactionViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+
+                if (user != null)
+                {
+                    if (ModelState.IsValid)
+                    {
+                        Transaction transaction = new Transaction
+                        {
+                            Title = model.Title,
+                            Description = model.Description,
+                            Amount = model.Amount,
+                            BankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId),
+                            Category = DbContext.Categories.FirstOrDefault(p => p.Id == model.CategoryId),
+                            Initiated = model.Initiated,
+                            CreatedBy = user,
+                            Owner = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId).Household.Owner,
+                        };
+
+                        DbContext.Transactions.Add(transaction);
+                        DbContext.SaveChanges();
+
+                        TransactionViewModel viewModel = new TransactionViewModel
+                        {
+                            Id = transaction.Id,
+                            Amount = transaction.Amount,
+                            BankAccountId = transaction.BankAccount.Id,
+                            Category = new CategoryViewModel
+                            {
+                                Id = transaction.Category.Id,
+                                Description = transaction.Category.Description,
+                                Created = transaction.Category.Created,
+                                HouseholdId = transaction.Category.Household.Id,
+                                Name = transaction.Category.Name,
+                                Updated = transaction.Category.Updated
+                            },
+                            CategoryId = transaction.Category.Id,
+                            Created = transaction.Created,
+                            Description = transaction.Description,
+                            Initiated = transaction.Initiated,
+                            IsVoid = transaction.IsVoid,
+                            Title = transaction.Title,
+                            Updated = transaction.Updated
+                        };
+
+                        return Ok(viewModel);
+                    }
+                    else
+                    {
+                        return BadRequest(ModelState);
+                    }
+                }
+                else
+                {
                     return Unauthorized();
                 }
             }
@@ -95,39 +179,46 @@ namespace HouseholdManagement.Controllers
             {
                 if (transaction.Owner == user || transaction.CreatedBy == user)
                 {
-                    transaction.Title = model.Title;
-                    transaction.Description = model.Description;
-                    transaction.Amount = model.Amount;
-                    transaction.Initiated = model.Initiated;
-                    transaction.Category = DbContext.Categories.FirstOrDefault(p => p.Id == model.CategoryId);
-                    transaction.BankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId);
-
-                    DbContext.SaveChanges();
-
-                    TransactionViewModel viewModel = new TransactionViewModel
+                    if (ModelState.IsValid)
                     {
-                        Id = transaction.Id,
-                        Amount = transaction.Amount,
-                        BankAccountId = transaction.BankAccount.Id,
-                        Category = new CategoryViewModel
-                        {
-                            Id = transaction.Category.Id,
-                            Description = transaction.Category.Description,
-                            Created = transaction.Category.Created,
-                            HouseholdId = transaction.Category.Household.Id,
-                            Name = transaction.Category.Name,
-                            Updated = transaction.Category.Updated
-                        },
-                        CategoryId = transaction.Category.Id,
-                        Created = transaction.Created,
-                        Description = transaction.Description,
-                        Initiated = transaction.Initiated,
-                        IsVoid = transaction.IsVoid,
-                        Title = transaction.Title,
-                        Updated = transaction.Updated
-                    };
+                        transaction.Title = model.Title;
+                        transaction.Description = model.Description;
+                        transaction.Amount = model.Amount;
+                        transaction.Initiated = model.Initiated;
+                        transaction.Category = DbContext.Categories.FirstOrDefault(p => p.Id == model.CategoryId);
+                        transaction.BankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId);
 
-                    return Ok(viewModel);
+                        DbContext.SaveChanges();
+
+                        TransactionViewModel viewModel = new TransactionViewModel
+                        {
+                            Id = transaction.Id,
+                            Amount = transaction.Amount,
+                            BankAccountId = transaction.BankAccount.Id,
+                            Category = new CategoryViewModel
+                            {
+                                Id = transaction.Category.Id,
+                                Description = transaction.Category.Description,
+                                Created = transaction.Category.Created,
+                                HouseholdId = transaction.Category.Household.Id,
+                                Name = transaction.Category.Name,
+                                Updated = transaction.Category.Updated
+                            },
+                            CategoryId = transaction.Category.Id,
+                            Created = transaction.Created,
+                            Description = transaction.Description,
+                            Initiated = transaction.Initiated,
+                            IsVoid = transaction.IsVoid,
+                            Title = transaction.Title,
+                            Updated = transaction.Updated
+                        };
+
+                        return Ok(viewModel);
+                    }
+                    else
+                    {
+                        return BadRequest(ModelState);
+                    }
                 }
                 else
                 {
@@ -173,23 +264,32 @@ namespace HouseholdManagement.Controllers
         {
             Transaction transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId);
 
-            if (transaction != null)
+            Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
+
+            if (transaction != null && user != null)
             {
-                if (isVoid)
+                if (transaction != null && user != null)
                 {
-                    transaction.IsVoid = true;
+                    if (isVoid)
+                    {
+                        transaction.IsVoid = true;
 
-                    DbContext.SaveChanges();
+                        DbContext.SaveChanges();
 
-                    return Ok("Transaction successfully voided.");
+                        return Ok("Transaction successfully voided.");
+                    }
+                    else
+                    {
+                        transaction.IsVoid = false;
+
+                        DbContext.SaveChanges();
+
+                        return Ok("Transaction successfully unvoided.");
+                    }
                 }
                 else
                 {
-                    transaction.IsVoid = false;
-
-                    DbContext.SaveChanges();
-
-                    return Ok("Transaction successfully unVoided.");
+                    return Unauthorized();
                 }
             }
             else
