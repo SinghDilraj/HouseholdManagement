@@ -121,10 +121,13 @@ namespace HouseholdManagement.Controllers
                             Initiated = model.Initiated,
                             CreatedBy = user,
                             Owner = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId).Household.Owner,
+                            IsVoid = false,
                         };
 
                         DbContext.Transactions.Add(transaction);
                         DbContext.SaveChanges();
+
+                        UpdateBalance(transaction, true);
 
                         TransactionViewModel viewModel = new TransactionViewModel
                         {
@@ -190,6 +193,8 @@ namespace HouseholdManagement.Controllers
 
                         DbContext.SaveChanges();
 
+                        UpdateBalance(transaction, true);
+
                         TransactionViewModel viewModel = new TransactionViewModel
                         {
                             Id = transaction.Id,
@@ -246,6 +251,8 @@ namespace HouseholdManagement.Controllers
                     DbContext.Transactions.Remove(transaction);
                     DbContext.SaveChanges();
 
+                    UpdateBalance(transaction, false);
+
                     return Ok("Successfully Deleted.");
                 }
                 else
@@ -260,7 +267,7 @@ namespace HouseholdManagement.Controllers
         }
 
         [Route("Void/{transactionId:int}")]
-        public IHttpActionResult VoidTransaction(int transactionId, bool isVoid)
+        public IHttpActionResult VoidTransaction(int transactionId, bool Void)
         {
             Transaction transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId);
 
@@ -270,11 +277,13 @@ namespace HouseholdManagement.Controllers
             {
                 if (transaction != null && user != null)
                 {
-                    if (isVoid)
+                    if (Void)
                     {
                         transaction.IsVoid = true;
 
                         DbContext.SaveChanges();
+
+                        UpdateBalance(transaction, false);
 
                         return Ok("Transaction successfully voided.");
                     }
@@ -283,6 +292,8 @@ namespace HouseholdManagement.Controllers
                         transaction.IsVoid = false;
 
                         DbContext.SaveChanges();
+
+                        UpdateBalance(transaction, true);
 
                         return Ok("Transaction successfully unvoided.");
                     }
@@ -296,6 +307,15 @@ namespace HouseholdManagement.Controllers
             {
                 return NotFound();
             }
+        }
+
+        private void UpdateBalance(Transaction transaction, bool add)
+        {
+            transaction.BankAccount.Balance = add ?
+                transaction.BankAccount.Balance + transaction.Amount :
+                transaction.BankAccount.Balance - transaction.Amount;
+
+            DbContext.SaveChanges();
         }
     }
 }
