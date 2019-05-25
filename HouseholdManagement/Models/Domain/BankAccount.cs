@@ -12,6 +12,7 @@ namespace HouseholdManagement.Models.Domain
         public DateTime? Updated { get; set; }
         public decimal Balance { get; set; }
         public virtual Household Household { get; set; }
+        public int HouseholdId { get; set; }
         public virtual List<Transaction> Transactions { get; set; }
 
         public BankAccount()

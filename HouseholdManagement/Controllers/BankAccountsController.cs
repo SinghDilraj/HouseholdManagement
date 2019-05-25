@@ -19,7 +19,7 @@ namespace HouseholdManagement.Controllers
             if (user != null)
             {
                 System.Collections.Generic.List<BankAccountViewModel> bankAccounts = DbContext.BankAccounts
-                    .Where(p => p.Household.Owner == user || p.Household.Members.Contains(user))
+                    .Where(p => p.Household.Owner.Id == user.Id || p.Household.Members.Any(q => q.Id == user.Id))
                     .Select(p => new BankAccountViewModel
                     {
                         Id = p.Id,
@@ -217,6 +217,7 @@ namespace HouseholdManagement.Controllers
                         bankAccount.Name = model.Name;
                         bankAccount.Description = model.Description;
                         bankAccount.Household = DbContext.Households.FirstOrDefault(p => p.Id == model.HouseholdId);
+                        bankAccount.HouseholdId = model.HouseholdId;
                         bankAccount.Updated = DateTime.Now;
 
                         DbContext.SaveChanges();
@@ -228,7 +229,7 @@ namespace HouseholdManagement.Controllers
                             Description = bankAccount.Description,
                             Balance = bankAccount.Balance,
                             Created = bankAccount.Created,
-                            HouseholdId = bankAccount.Household.Id,
+                            HouseholdId = bankAccount.HouseholdId,
                             Updated = bankAccount.Updated,
                             Transactions = bankAccount.Transactions
                         .Select(q => new TransactionViewModel
