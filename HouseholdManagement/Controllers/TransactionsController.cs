@@ -318,11 +318,14 @@ namespace HouseholdManagement.Controllers
 
         private void UpdateBalance(Transaction transaction, bool add)
         {
-            transaction.BankAccount.Balance = add ?
-                transaction.BankAccount.Balance + transaction.Amount :
-                transaction.BankAccount.Balance - transaction.Amount;
+            if (!transaction.IsVoid)
+            {
+                transaction.BankAccount.Balance = add ?
+                    transaction.BankAccount.Balance + transaction.Amount :
+                    transaction.BankAccount.Balance - transaction.Amount;
 
-            DbContext.SaveChanges();
+                DbContext.SaveChanges();
+            }
         }
     }
 }
