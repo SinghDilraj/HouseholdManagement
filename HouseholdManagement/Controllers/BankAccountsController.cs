@@ -69,7 +69,7 @@ namespace HouseholdManagement.Controllers
             if (user != null)
             {
                 BankAccount bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == BankAccountId &&
-                (p.Household.Owner == user || p.Household.Members.Contains(user)));
+                (p.Household.Owner == user || p.Household.Members.Any(q => q.Id == user.Id)));
 
                 if (bankAccount != null)
                 {

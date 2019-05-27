@@ -19,7 +19,7 @@ namespace HouseholdManagement.Controllers
             if (user != null)
             {
                 List<TransactionViewModel> transactions = DbContext.Transactions
-                    .Where(p => p.BankAccount.Household.Members.Contains(user) || p.BankAccount.Household.Owner == user)
+                    .Where(p => p.BankAccount.Household.Members.Any(q => q.Id == user.Id) || p.BankAccount.Household.Owner == user)
                     .Select(l => new TransactionViewModel
                     {
                         Id = l.Id,
@@ -60,7 +60,7 @@ namespace HouseholdManagement.Controllers
             if (user != null)
             {
                 Transaction transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId &&
-                    p.BankAccount.Household.Members.Contains(user) || p.BankAccount.Household.Owner == user);
+                    p.BankAccount.Household.Members.Any(q => q.Id == user.Id) || p.BankAccount.Household.Owner == user);
 
                 if (transaction != null)
                 {
