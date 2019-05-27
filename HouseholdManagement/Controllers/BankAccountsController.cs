@@ -216,8 +216,6 @@ namespace HouseholdManagement.Controllers
                     {
                         bankAccount.Name = model.Name;
                         bankAccount.Description = model.Description;
-                        bankAccount.Household = DbContext.Households.FirstOrDefault(p => p.Id == model.HouseholdId);
-                        bankAccount.HouseholdId = model.HouseholdId;
                         bankAccount.Updated = DateTime.Now;
 
                         DbContext.SaveChanges();
