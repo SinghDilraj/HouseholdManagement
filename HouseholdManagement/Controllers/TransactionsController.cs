@@ -208,6 +208,8 @@ namespace HouseholdManagement.Controllers
                         {
                             if (category.Household.Id == bankAccount.Household.Id)
                             {
+                                UpdateBalance(transaction, false);
+
                                 transaction.Title = model.Title;
                                 transaction.Description = model.Description;
                                 transaction.Amount = model.Amount;
