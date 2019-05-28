@@ -111,54 +111,64 @@ namespace HouseholdManagement.Controllers
                 {
                     if (ModelState.IsValid)
                     {
-                        Transaction transaction = new Transaction
+                        Category category = DbContext.Categories.FirstOrDefault(p => p.Id == model.CategoryId);
+                        BankAccount bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId);
+
+                        if (category != null && bankAccount != null)
                         {
-                            Title = model.Title,
-                            Description = model.Description,
-                            Amount = model.Amount,
-                            BankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId),
-                            Category = DbContext.Categories.FirstOrDefault(p => p.Id == model.CategoryId),
-                            Initiated = model.Initiated,
-                            CreatedBy = user,
-                            Owner = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId).Household.Owner,
-                            IsVoid = false,
-                        };
-
-                        if (transaction.Category.Household == transaction.BankAccount.Household)
-                        {
-                            DbContext.Transactions.Add(transaction);
-                            DbContext.SaveChanges();
-
-                            UpdateBalance(transaction, true);
-
-                            TransactionViewModel viewModel = new TransactionViewModel
+                            if (category.Household == bankAccount.Household)
                             {
-                                Id = transaction.Id,
-                                Amount = transaction.Amount,
-                                BankAccountId = transaction.BankAccount.Id,
-                                Category = new CategoryViewModel
+                                Transaction transaction = new Transaction
                                 {
-                                    Id = transaction.Category.Id,
-                                    Description = transaction.Category.Description,
-                                    Created = transaction.Category.Created,
-                                    HouseholdId = transaction.Category.Household.Id,
-                                    Name = transaction.Category.Name,
-                                    Updated = transaction.Category.Updated
-                                },
-                                CategoryId = transaction.Category.Id,
-                                Created = transaction.Created,
-                                Description = transaction.Description,
-                                Initiated = transaction.Initiated,
-                                IsVoid = transaction.IsVoid,
-                                Title = transaction.Title,
-                                Updated = transaction.Updated
-                            };
+                                    Title = model.Title,
+                                    Description = model.Description,
+                                    Amount = model.Amount,
+                                    BankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId),
+                                    Category = DbContext.Categories.FirstOrDefault(p => p.Id == model.CategoryId),
+                                    Initiated = model.Initiated,
+                                    CreatedBy = user,
+                                    Owner = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId).Household.Owner,
+                                    IsVoid = false,
+                                };
 
-                            return Ok(viewModel);
+                                DbContext.Transactions.Add(transaction);
+                                DbContext.SaveChanges();
+
+                                UpdateBalance(transaction, true);
+
+                                TransactionViewModel viewModel = new TransactionViewModel
+                                {
+                                    Id = transaction.Id,
+                                    Amount = transaction.Amount,
+                                    BankAccountId = transaction.BankAccount.Id,
+                                    Category = new CategoryViewModel
+                                    {
+                                        Id = transaction.Category.Id,
+                                        Description = transaction.Category.Description,
+                                        Created = transaction.Category.Created,
+                                        HouseholdId = transaction.Category.Household.Id,
+                                        Name = transaction.Category.Name,
+                                        Updated = transaction.Category.Updated
+                                    },
+                                    CategoryId = transaction.Category.Id,
+                                    Created = transaction.Created,
+                                    Description = transaction.Description,
+                                    Initiated = transaction.Initiated,
+                                    IsVoid = transaction.IsVoid,
+                                    Title = transaction.Title,
+                                    Updated = transaction.Updated
+                                };
+
+                                return Ok(viewModel);
+                            }
+                            else
+                            {
+                                return BadRequest("Bank Account and category Household do not match.");
+                            }
                         }
                         else
                         {
-                            return BadRequest("Bank Account and category Household do not match.");
+                            return NotFound();
                         }
                     }
                     else
