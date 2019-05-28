@@ -191,41 +191,58 @@ namespace HouseholdManagement.Controllers
                 {
                     if (ModelState.IsValid)
                     {
-                        transaction.Title = model.Title;
-                        transaction.Description = model.Description;
-                        transaction.Amount = model.Amount;
-                        transaction.Initiated = model.Initiated;
-                        transaction.Category = DbContext.Categories.FirstOrDefault(p => p.Id == model.CategoryId);
-                        transaction.BankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId);
+                        Category category = DbContext.Categories.FirstOrDefault(p => p.Id == model.CategoryId);
+                        BankAccount bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == model.BankAccountId);
 
-                        DbContext.SaveChanges();
-
-                        UpdateBalance(transaction, true);
-
-                        TransactionViewModel viewModel = new TransactionViewModel
+                        if (category != null && bankAccount != null)
                         {
-                            Id = transaction.Id,
-                            Amount = transaction.Amount,
-                            BankAccountId = transaction.BankAccount.Id,
-                            Category = new CategoryViewModel
+                            if (category.Household.Id == bankAccount.Household.Id)
                             {
-                                Id = transaction.Category.Id,
-                                Description = transaction.Category.Description,
-                                Created = transaction.Category.Created,
-                                HouseholdId = transaction.Category.Household.Id,
-                                Name = transaction.Category.Name,
-                                Updated = transaction.Category.Updated
-                            },
-                            CategoryId = transaction.Category.Id,
-                            Created = transaction.Created,
-                            Description = transaction.Description,
-                            Initiated = transaction.Initiated,
-                            IsVoid = transaction.IsVoid,
-                            Title = transaction.Title,
-                            Updated = transaction.Updated
-                        };
+                                transaction.Title = model.Title;
+                                transaction.Description = model.Description;
+                                transaction.Amount = model.Amount;
+                                transaction.Initiated = model.Initiated;
+                                transaction.Category = category;
+                                transaction.BankAccount = bankAccount;
 
-                        return Ok(viewModel);
+                                DbContext.SaveChanges();
+
+                                UpdateBalance(transaction, true);
+
+                                TransactionViewModel viewModel = new TransactionViewModel
+                                {
+                                    Id = transaction.Id,
+                                    Amount = transaction.Amount,
+                                    BankAccountId = transaction.BankAccount.Id,
+                                    Category = new CategoryViewModel
+                                    {
+                                        Id = transaction.Category.Id,
+                                        Description = transaction.Category.Description,
+                                        Created = transaction.Category.Created,
+                                        HouseholdId = transaction.Category.Household.Id,
+                                        Name = transaction.Category.Name,
+                                        Updated = transaction.Category.Updated
+                                    },
+                                    CategoryId = transaction.Category.Id,
+                                    Created = transaction.Created,
+                                    Description = transaction.Description,
+                                    Initiated = transaction.Initiated,
+                                    IsVoid = transaction.IsVoid,
+                                    Title = transaction.Title,
+                                    Updated = transaction.Updated
+                                };
+
+                                return Ok(viewModel);
+                            }
+                            else
+                            {
+                                return BadRequest("Bank Account and category Household do not match.");
+                            }
+                        }
+                        else
+                        {
+                            return NotFound();
+                        }
                     }
                     else
                     {
