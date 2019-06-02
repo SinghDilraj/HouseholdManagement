@@ -12,6 +12,7 @@ namespace HouseholdManagement.Controllers
     public class BankAccountsController : BaseController
     {
         // GET: api/BankAccounts
+        [Route("")]
         public IHttpActionResult GetAllBankAccounts()
         {
             Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
@@ -119,6 +120,7 @@ namespace HouseholdManagement.Controllers
         }
 
         // POST: api/BankAccounts
+        [Route("")]
         public IHttpActionResult PostNewBankAccount(BankAccountViewModel model)
         {
             Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());

@@ -12,6 +12,7 @@ namespace HouseholdManagement.Controllers
     public class TransactionsController : BaseController
     {
         // GET: api/Transactions
+        [Route("")]
         public IHttpActionResult Get()
         {
             Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
@@ -101,6 +102,7 @@ namespace HouseholdManagement.Controllers
         }
 
         // POST: api/Transactions
+        [Route("")]
         public IHttpActionResult Post(TransactionViewModel model)
         {
             if (ModelState.IsValid)

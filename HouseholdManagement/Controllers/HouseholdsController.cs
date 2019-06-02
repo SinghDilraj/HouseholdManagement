@@ -25,6 +25,7 @@ namespace HouseholdManagement.Controllers
         /// ok with list of all the households user is part of
         /// </returns>
         //GET: api/Household
+        [Route("")]
         public IHttpActionResult GetAllHouseholds()
         {
             string userId = User.Identity.GetUserId();
@@ -32,7 +33,7 @@ namespace HouseholdManagement.Controllers
             if (!string.IsNullOrEmpty(userId))
             {
                 System.Collections.Generic.List<HouseholdViewModel> households = DbContext.Households
-                    .Where(p => p.Owner.Id == userId || p.Members.Any(q => q.Id == userId))
+                    //.Where(p => p.Owner.Id == userId || p.Members.Any(q => q.Id == userId))
                     .Select(p => new HouseholdViewModel
                     {
                         Id = p.Id,
@@ -125,42 +126,47 @@ namespace HouseholdManagement.Controllers
 
             if (household != null && user != null)
             {
-                if (household.Owner.Id == user.Id || household.Members.Contains(user))
+                //if (household.Owner.Id == user.Id || household.Members.Contains(user))
+                //{
+                HouseholdViewModel viewModel = new HouseholdViewModel
                 {
-                    HouseholdViewModel viewModel = new HouseholdViewModel
+                    Id = household.Id,
+                    Name = household.Name,
+                    Description = household.Description,
+                    Created = household.Created,
+                    Updated = household.Updated,
+                    Owner = new UserViewModel
                     {
-                        Id = household.Id,
-                        Name = household.Name,
-                        Description = household.Description,
-                        Created = household.Created,
-                        Updated = household.Updated,
-                        Owner = new UserViewModel
-                        {
-                            Id = household.Owner.Id,
-                            Email = household.Owner.Email
-                        },
-                        Categories = household.Categories.Select(x => new CategoryViewModel
-                        {
-                            Id = x.Id,
-                            Name = x.Name,
-                            Description = x.Description,
-                            Created = x.Created,
-                            Updated = x.Updated,
-                            HouseholdId = x.Household.Id
-                        }).ToList(),
-                        Members = household.Members.Select(q => new UserViewModel
-                        {
-                            Id = q.Id,
-                            Email = q.Email
-                        }).ToList()
-                    };
+                        Id = household.Owner.Id,
+                        Email = household.Owner.Email
+                    },
+                    Categories = household.Categories.Select(x => new CategoryViewModel
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Description = x.Description,
+                        Created = x.Created,
+                        Updated = x.Updated,
+                        HouseholdId = x.Household.Id
+                    }).ToList(),
+                    Members = household.Members.Select(q => new UserViewModel
+                    {
+                        Id = q.Id,
+                        Email = q.Email
+                    }).ToList(),
+                    Invitees = household.Invitees.Select(r => new UserViewModel
+                    {
+                        Id = r.Id,
+                        Email = r.Email
+                    }).ToList()
+                };
 
-                    return Ok(viewModel);
-                }
-                else
-                {
-                    return Unauthorized();
-                }
+                return Ok(viewModel);
+                //}
+                //else
+                //{
+                //return Unauthorized();
+                //}
             }
             else
             {
@@ -177,7 +183,8 @@ namespace HouseholdManagement.Controllers
         /// <returns>
         /// ok with the created household
         /// </returns>
-        // POST: api/Household
+        // POST: api/Household5
+        [Route("")]
         public IHttpActionResult PostCreateHousehold(HouseholdEditModel model)
         {
             Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
@@ -383,7 +390,7 @@ namespace HouseholdManagement.Controllers
                     {
                         MyEmailService mailService = new MyEmailService();
 
-                        if (!household.Invitees.Contains(user))
+                        if (!household.Invitees.Contains(user) && owner != user)
                         {
                             household.Invitees.Add(user);
 

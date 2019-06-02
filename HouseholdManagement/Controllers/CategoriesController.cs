@@ -21,6 +21,7 @@ namespace HouseholdManagement.Controllers
         /// list of all categories
         /// </returns>
         // GET: api/Category
+        [Route("")]
         public IHttpActionResult GetAllCategories()
         {
             string userId = User.Identity.GetUserId();
@@ -102,6 +103,7 @@ namespace HouseholdManagement.Controllers
         /// newly created category
         /// </returns>
         // POST: api/Category
+        [Route("")]
         public IHttpActionResult Post(CategoryViewModel model)
         {
             Models.ApplicationUser user = DefaultUserManager.FindById(User.Identity.GetUserId());
