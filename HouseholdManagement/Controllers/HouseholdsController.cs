@@ -156,17 +156,16 @@ namespace HouseholdManagement.Controllers
                     Name = household.Name,
                     Description = household.Description,
                     Created = household.Created,
-                    Updated = household.Updated
+                    Updated = household.Updated,
+                    Owner = new UserViewModel
+                    {
+                        Id = household.Owner.Id,
+                        Email = household.Owner.Email
+                    }
                 };
 
                 if (household.Owner.Id == user.Id || household.Members.Any(m => m.Id == user.Id))
                 {
-                    viewModel.Owner = new UserViewModel
-                    {
-                        Id = household.Owner.Id,
-                        Email = household.Owner.Email
-                    };
-
                     viewModel.Categories = household.Categories.Select(x => new CategoryViewModel
                     {
                         Id = x.Id,
