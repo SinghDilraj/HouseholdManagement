@@ -33,7 +33,6 @@ namespace HouseholdManagement.Controllers
             if (!string.IsNullOrEmpty(userId))
             {
                 System.Collections.Generic.List<HouseholdViewModel> households = DbContext.Households
-                    //.Where(p => p.Owner.Id == userId || p.Members.Any(q => q.Id == userId))
                     .Select(p => new HouseholdViewModel
                     {
                         Id = p.Id,
@@ -41,25 +40,6 @@ namespace HouseholdManagement.Controllers
                         Description = p.Description,
                         Created = p.Created,
                         Updated = p.Updated,
-                        //Owner = new UserViewModel
-                        //{
-                        //    Id = p.Owner.Id,
-                        //    Email = p.Owner.Email
-                        //},
-                        //Categories = p.Categories.Select(x => new CategoryViewModel
-                        //{
-                        //    Id = x.Id,
-                        //    Name = x.Name,
-                        //    Description = x.Description,
-                        //    Created = x.Created,
-                        //    Updated = x.Updated,
-                        //    HouseholdId = x.Household.Id
-                        //}).ToList(),
-                        //Members = p.Members.Select(q => new UserViewModel
-                        //{
-                        //    Id = q.Id,
-                        //    Email = q.Email
-                        //}).ToList()
                     }).ToList();
 
                 return Ok(households);
@@ -177,45 +157,10 @@ namespace HouseholdManagement.Controllers
                     Description = household.Description,
                     Created = household.Created,
                     Updated = household.Updated,
+                    OwnerEmail = household.Owner.Email
                 };
 
-                //if (household.Owner.Id == user.Id || household.Members.Contains(user))
-                //{
-                //    viewModel.Owner = new UserViewModel
-                //    {
-                //        Id = household.Owner.Id,
-                //        Email = household.Owner.Email
-                //    };
-
-                //    viewModel.Categories = household.Categories.Select(x => new CategoryViewModel
-                //    {
-                //        Id = x.Id,
-                //        Name = x.Name,
-                //        Description = x.Description,
-                //        Created = x.Created,
-                //        Updated = x.Updated,
-                //        HouseholdId = x.Household.Id
-                //    }).ToList();
-
-                //    viewModel.Members = household.Members.Select(q => new UserViewModel
-                //    {
-                //        Id = q.Id,
-                //        Email = q.Email
-                //    }).ToList();
-
-                //    viewModel.Invitees = household.Invitees.Select(r => new UserViewModel
-                //    {
-                //        Id = r.Id,
-                //        Email = r.Email
-                //    }).ToList();
-                //}
-
                 return Ok(viewModel);
-                //}
-                //else
-                //{
-                //return Unauthorized();
-                //}
             }
             else
             {
@@ -260,25 +205,6 @@ namespace HouseholdManagement.Controllers
                         Description = household.Description,
                         Created = household.Created,
                         Updated = household.Updated,
-                        Owner = new UserViewModel
-                        {
-                            Id = household.Owner.Id,
-                            Email = household.Owner.Email
-                        },
-                        Categories = household.Categories.Select(x => new CategoryViewModel
-                        {
-                            Id = x.Id,
-                            Name = x.Name,
-                            Description = x.Description,
-                            Created = x.Created,
-                            Updated = x.Updated,
-                            HouseholdId = x.Household.Id
-                        }).ToList(),
-                        Members = household.Members.Select(q => new UserViewModel
-                        {
-                            Id = q.Id,
-                            Email = q.Email
-                        }).ToList()
                     };
 
                     return Ok(viewModel);
@@ -333,25 +259,6 @@ namespace HouseholdManagement.Controllers
                             Description = household.Description,
                             Created = household.Created,
                             Updated = household.Updated,
-                            Owner = new UserViewModel
-                            {
-                                Id = household.Owner.Id,
-                                Email = household.Owner.Email
-                            },
-                            Categories = household.Categories.Select(x => new CategoryViewModel
-                            {
-                                Id = x.Id,
-                                Name = x.Name,
-                                Description = x.Description,
-                                Created = x.Created,
-                                Updated = x.Updated,
-                                HouseholdId = x.Household.Id
-                            }).ToList(),
-                            Members = household.Members.Select(q => new UserViewModel
-                            {
-                                Id = q.Id,
-                                Email = q.Email
-                            }).ToList()
                         };
 
                         return Ok(viewModel);
