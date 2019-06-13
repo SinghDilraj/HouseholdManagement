@@ -33,6 +33,7 @@ namespace HouseholdManagement.Controllers
             if (!string.IsNullOrEmpty(userId))
             {
                 System.Collections.Generic.List<HouseholdViewModel> households = DbContext.Households
+                    .Where(p => p.Owner.Id == userId || p.Members.Any(m => m.Id == userId) || p.Invitees.Any(i => i.Id == userId))
                     .Select(p => new HouseholdViewModel
                     {
                         Id = p.Id,
@@ -163,6 +164,15 @@ namespace HouseholdManagement.Controllers
                         Email = household.Owner.Email
                     }
                 };
+
+                if (household.Invitees.Any(i => i.Id == user.Id))
+                {
+                    viewModel.Invitees = household.Invitees.Select(r => new UserViewModel
+                    {
+                        Id = r.Id,
+                        Email = r.Email
+                    }).ToList();
+                }
 
                 if (household.Owner.Id == user.Id || household.Members.Any(m => m.Id == user.Id))
                 {
