@@ -3,6 +3,7 @@ using HouseholdManagement.Models.Helpers;
 using HouseholdManagement.Models.ViewModels;
 using Microsoft.AspNet.Identity;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Mvc;
@@ -123,6 +124,37 @@ namespace HouseholdManagement.Controllers
                         Email = i.Email
                     }).ToList()
                 };
+
+                return Ok(viewModel);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [Route("Categories/{householdId:int}")]
+        //GET: api/Household
+        public IHttpActionResult GetCategoriesFromHousehold(int householdId)
+        {
+            string userId = User.Identity.GetUserId();
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                Household household = DbContext.Households
+                    .FirstOrDefault(p => p.Id == householdId && (p.Owner.Id == userId || p.Members.Any(m => m.Id == userId)));
+
+                List<CategoryViewModel> viewModel = DbContext.Categories
+                    .Where(p => p.Household.Id == householdId && (p.Household.Owner.Id == userId || p.Household.Members.Any(m => m.Id == userId)))
+                    .Select(p => new CategoryViewModel
+                    {
+                        Id = p.Id,
+                        Created = p.Created,
+                        Description = p.Description,
+                        HouseholdId = p.Household.Id,
+                        Name = p.Name,
+                        Updated = p.Updated
+                    }).ToList();
 
                 return Ok(viewModel);
             }
