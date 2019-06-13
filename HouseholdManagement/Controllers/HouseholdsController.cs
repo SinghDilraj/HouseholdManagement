@@ -157,7 +157,62 @@ namespace HouseholdManagement.Controllers
                     Description = household.Description,
                     Created = household.Created,
                     Updated = household.Updated,
-                    OwnerEmail = household.Owner.Email
+                    Owner = new UserViewModel
+                    {
+                        Id = household.Owner.Id,
+                        Email = household.Owner.Email
+                    },
+                    Categories = household.Categories.Select(x => new CategoryViewModel
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Description = x.Description,
+                        Created = x.Created,
+                        Updated = x.Updated,
+                        HouseholdId = x.Household.Id
+                    }).ToList(),
+                    BankAccounts = household.BankAccounts.Select(b => new BankAccountViewModel
+                    {
+                        Id = b.Id,
+                        Name = b.Name,
+                        Balance = b.Balance,
+                        Created = b.Created,
+                        Description = b.Description,
+                        HouseholdId = b.Household.Id,
+                        Transactions = b.Transactions.Select(t => new TransactionViewModel
+                        {
+                            Id = t.Id,
+                            Description = t.Description,
+                            Amount = t.Amount,
+                            BankAccountId = t.BankAccount.Id,
+                            Category = new CategoryViewModel
+                            {
+                                Created = t.Category.Created,
+                                Description = t.Category.Description,
+                                Id = t.Category.Id,
+                                HouseholdId = t.Category.Household.Id,
+                                Name = t.Category.Name,
+                                Updated = t.Category.Updated
+                            },
+                            CategoryId = t.Category.Id,
+                            Created = t.Created,
+                            Initiated = t.Initiated,
+                            IsVoid = t.IsVoid,
+                            Title = t.Title,
+                            Updated = t.Updated
+                        }).ToList(),
+                        Updated = b.Updated
+                    }).ToList(),
+                    Members = household.Members.Select(q => new UserViewModel
+                    {
+                        Id = q.Id,
+                        Email = q.Email
+                    }).ToList(),
+                    Invitees = household.Invitees.Select(r => new UserViewModel
+                    {
+                        Id = r.Id,
+                        Email = r.Email
+                    }).ToList()
                 };
 
                 return Ok(viewModel);

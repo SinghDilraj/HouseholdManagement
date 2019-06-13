@@ -10,19 +10,20 @@ namespace HouseholdManagement.Models.ViewModels
         public string Name { get; set; }
         [Required]
         public string Description { get; set; }
-        public string OwnerEmail { get; set; }
-
-        //public UserViewModel Owner { get; set; }
-        //public List<UserViewModel> Members { get; set; }
-        //public List<UserViewModel> Invitees { get; set; }
-        //public List<CategoryViewModel> Categories { get; set; }
+        public UserViewModel Owner { get; set; }
+        public List<UserViewModel> Members { get; set; }
+        public List<UserViewModel> Invitees { get; set; }
+        public List<CategoryViewModel> Categories { get; set; }
+        public List<BankAccountViewModel> BankAccounts { get; set; }
         public DateTime Created { get; set; }
         public DateTime? Updated { get; set; }
 
-        //public HouseholdViewModel()
-        //{
-        //    Members = new List<UserViewModel>();
-        //    Invitees = new List<UserViewModel>();
-        //}
+        public HouseholdViewModel()
+        {
+            Members = new List<UserViewModel>();
+            Invitees = new List<UserViewModel>();
+            Categories = new List<CategoryViewModel>();
+            BankAccounts = new List<BankAccountViewModel>();
+        }
     }
 }
