@@ -156,13 +156,18 @@ namespace HouseholdManagement.Controllers
                     Name = household.Name,
                     Description = household.Description,
                     Created = household.Created,
-                    Updated = household.Updated,
-                    Owner = new UserViewModel
+                    Updated = household.Updated
+                };
+
+                if (household.Owner.Id == user.Id || household.Members.Any(m => m.Id == user.Id))
+                {
+                    viewModel.Owner = new UserViewModel
                     {
                         Id = household.Owner.Id,
                         Email = household.Owner.Email
-                    },
-                    Categories = household.Categories.Select(x => new CategoryViewModel
+                    };
+
+                    viewModel.Categories = household.Categories.Select(x => new CategoryViewModel
                     {
                         Id = x.Id,
                         Name = x.Name,
@@ -170,8 +175,9 @@ namespace HouseholdManagement.Controllers
                         Created = x.Created,
                         Updated = x.Updated,
                         HouseholdId = x.Household.Id
-                    }).ToList(),
-                    BankAccounts = household.BankAccounts.Select(b => new BankAccountViewModel
+                    }).ToList();
+
+                    viewModel.BankAccounts = household.BankAccounts.Select(b => new BankAccountViewModel
                     {
                         Id = b.Id,
                         Name = b.Name,
@@ -202,17 +208,19 @@ namespace HouseholdManagement.Controllers
                             Updated = t.Updated
                         }).ToList(),
                         Updated = b.Updated
-                    }).ToList(),
-                    Members = household.Members.Select(q => new UserViewModel
+                    }).ToList();
+
+                    viewModel.Members = household.Members.Select(q => new UserViewModel
                     {
                         Id = q.Id,
                         Email = q.Email
-                    }).ToList(),
-                    Invitees = household.Invitees.Select(r => new UserViewModel
+                    }).ToList();
+
+                    viewModel.Invitees = household.Invitees.Select(r => new UserViewModel
                     {
                         Id = r.Id,
                         Email = r.Email
-                    }).ToList()
+                    }).ToList();
                 };
 
                 return Ok(viewModel);
