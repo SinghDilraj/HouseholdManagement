@@ -112,6 +112,45 @@ namespace HouseholdManagement.Controllers
             }
         }
 
+        [Route("Users/{householdId:int}")]
+        //GET: api/Household
+        public IHttpActionResult GetUsersFromHousehold(int householdId)
+        {
+            string userId = User.Identity.GetUserId();
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                Household household = DbContext.Households
+                    .FirstOrDefault(p => p.Id == householdId);
+
+                HouseholdUsersViewModel viewModel = new HouseholdUsersViewModel
+                {
+                    HouseholdId = household.Id,
+                    Owner = new UserViewModel
+                    {
+                        Id = household.Owner.Id,
+                        Email = household.Owner.Email
+                    },
+                    Members = household.Members.Select(q => new UserViewModel
+                    {
+                        Id = q.Id,
+                        Email = q.Email
+                    }).ToList(),
+                    Invitees = household.Invitees.Select(i => new UserViewModel
+                    {
+                        Id = i.Id,
+                        Email = i.Email
+                    }).ToList()
+                };
+
+                return Ok(viewModel);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
         /// <summary>
         /// get method to return a household if user is a part of it
         /// </summary>
