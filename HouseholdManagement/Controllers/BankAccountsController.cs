@@ -316,6 +316,8 @@ namespace HouseholdManagement.Controllers
                         .Where(p => !p.IsVoid)
                         .Select(p => p.Amount).Sum();
 
+                    DbContext.SaveChanges();
+
                     return Ok($"Balance Updated, new Balance is {bankAccount.Balance}");
                 }
                 else
