@@ -61,7 +61,7 @@ namespace HouseholdManagement.Controllers
             if (user != null)
             {
                 Transaction transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId &&
-                    p.BankAccount.Household.Members.Any(q => q.Id == user.Id) || p.BankAccount.Household.Owner == user);
+                    p.BankAccount.Household.Members.Any(q => q.Id == user.Id) || p.BankAccount.Household.Owner.Id == user.Id);
 
                 if (transaction != null)
                 {
@@ -286,10 +286,10 @@ namespace HouseholdManagement.Controllers
             {
                 if (transaction.Owner == user || transaction.CreatedBy == user)
                 {
+                    UpdateBalance(transaction, false);
                     DbContext.Transactions.Remove(transaction);
                     DbContext.SaveChanges();
 
-                    UpdateBalance(transaction, false);
 
                     return Ok("Successfully Deleted.");
                 }
